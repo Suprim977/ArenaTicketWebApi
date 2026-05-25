@@ -1,6 +1,16 @@
+'use client';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
+  const router = useRouter();
+
+  // Handle form submit and redirect to login
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault(); // Stop page from reloading
+    router.push('/login'); // Redirect to login page
+  };
+
   return (
     <div className="min-h-screen flex bg-white">
       
@@ -16,7 +26,7 @@ export default function RegisterPage() {
           <p className="text-gray-500 mb-8 text-sm">Join the elite arena for competitive esports ticketing and event management.</p>
 
           {/* Form */}
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmit}>
             
             {/* Full Name */}
             <div>
@@ -72,7 +82,7 @@ export default function RegisterPage() {
             </div>
 
             {/* Register Button */}
-            <button className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 font-medium">
+            <button type="submit" className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 font-medium">
               Sign Up
             </button>
 
