@@ -1,99 +1,83 @@
+'use client';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { z } from 'zod';
+import { api } from '@/lib/api';
 import Link from 'next/link';
 
+const loginSchema = z.object({
+  email: z.string().email('Invalid email'),
+  password: z.string().min(1, 'Password is required'),
+});
+
 export default function LoginPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
+
+  useEffect(() => {
+    if (searchParams.get('registered') === 'true') {
+      setSuccessMsg('Account created! Please login.');
+    }
+  }, [searchParams]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (errors[e.target.name]) setErrors({ ...errors, [e.target.name]: '' });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+    setSuccessMsg('');
+    const result = loginSchema.safeParse(formData);
+    if (!result.success) {
+      const newErrors: Record<string, string> = {};
+      result.error.errors.forEach((err) => { newErrors[err.path[0] as string] = err.message; });
+      setErrors(newErrors);
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await api.login(formData);
+      if (response.error) {
+        setErrors({ submit: response.error });
+      } else {
+        router.push('/dashboard');
+      }
+    } catch (err) {
+      setErrors({ submit: 'Server error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex bg-white">
-      
-      {/* Left Side - Logo & Stats */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gray-50 items-center justify-center p-12">
-        <div className="text-center">
-          
-          {/* Logo */}
-          <div className="bg-white p-8 rounded-2xl shadow-lg mb-8">
-            <div className="w-20 h-20 bg-gradient-to-b from-purple-600 to-pink-500 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
-                <div className="w-6 h-6 bg-purple-600 rounded-full"></div>
-              </div>
-            </div>
-            <h2 className="text-2xl font-bold text-gray-800">ArenaTicket</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-md">
+        <h1 className="text-2xl font-bold text-center mb-6">Login</h1>
+        {successMsg && <p className="text-green-600 text-sm mb-4 bg-green-50 p-2 rounded text-center">{successMsg}</p>}
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div>
+            <label className="block text-sm mb-1">Email</label>
+            <input name="email" type="email" value={formData.email} onChange={handleChange} className={`w-full border rounded px-3 py-2 ${errors.email ? 'border-red-500' : 'border-gray-300'}`} />
+            {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
           </div>
-
-          {/* Stats */}
-          <div className="flex gap-12 text-gray-600">
-            <div>
-              <div className="text-3xl font-bold text-gray-800">500+</div>
-              <div className="text-sm">Annual Tournaments</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-gray-800">2M+</div>
-              <div className="text-sm">Tickets Secured</div>
-            </div>
+          <div>
+            <label className="block text-sm mb-1">Password</label>
+            <input name="password" type="password" value={formData.password} onChange={handleChange} className={`w-full border rounded px-3 py-2 ${errors.password ? 'border-red-500' : 'border-gray-300'}`} />
+            {errors.password && <p className="text-red-500 text-xs">{errors.password}</p>}
           </div>
-
-        </div>
+          <button disabled={loading} className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50">
+            {loading ? 'Logging in...' : 'Login'}
+          </button>
+          {errors.submit && <p className="text-red-500 text-center text-sm">{errors.submit}</p>}
+        </form>
+        <p className="text-center mt-4 text-sm">Don't have an account? <Link href="/register" className="text-blue-600">Register</Link></p>
       </div>
-
-      {/* Right Side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
-        <div className="w-full max-w-md">
-          
-          {/* Title */}
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-          <p className="text-gray-500 mb-8 text-sm">Access your arena pass and upcoming tournament schedule.</p>
-
-          {/* Form */}
-          <form className="space-y-5">
-            
-            {/* Email */}
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 uppercase mb-2">Email Address</label>
-              <input 
-                type="email" 
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-600 bg-white text-gray-900"
-                required
-              />
-            </div>
-
-            {/* Password */}
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <label className="block text-xs font-semibold text-gray-700 uppercase">Password</label>
-                <a href="#" className="text-xs text-indigo-600 hover:underline">Forgot password?</a>
-              </div>
-              <input 
-                type="password" 
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-600 bg-white text-gray-900"
-                required
-              />
-            </div>
-
-            {/* Login Button */}
-            <button className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 font-medium">
-              Login →
-            </button>
-
-          </form>
-
-          {/* Register Link */}
-          <p className="text-center mt-6 text-sm text-gray-600">
-            Don't have an account?{' '}
-            <Link href="/register" className="text-indigo-600 font-semibold hover:underline">
-              Sign Up
-            </Link>
-          </p>
-
-          {/* Footer Links */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <div className="flex justify-center gap-6 text-xs text-gray-400">
-              <a href="#" className="hover:text-gray-600">Privacy Policy</a>
-              <a href="#" className="hover:text-gray-600">Terms of Service</a>
-              <a href="#" className="hover:text-gray-600">Support</a>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
     </div>
   );
 }
