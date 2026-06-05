@@ -1,116 +1,88 @@
 'use client';
-import Link from 'next/link';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { z } from 'zod';
+import { api } from '@/lib/api';
+import Link from 'next/link';
+
+const registerSchema = z.object({
+  fullName: z.string().min(2, 'Name too short'),
+  email: z.string().email('Invalid email'),
+  password: z.string().min(6, 'Password too short'),
+  confirm: z.string(),
+}).refine((data) => data.password === data.confirm, {
+  message: "Passwords don't match",
+  path: ["confirm"],
+});
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [formData, setFormData] = useState({ fullName: '', email: '', password: '', confirm: '' });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
 
-  // Handle form submit and redirect to login
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault(); // Stop page from reloading
-    router.push('/login'); // Redirect to login page
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (errors[e.target.name]) setErrors({ ...errors, [e.target.name]: '' });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+    const result = registerSchema.safeParse(formData);
+    if (!result.success) {
+      const newErrors: Record<string, string> = {};
+      result.error.errors.forEach((err) => { newErrors[err.path[0] as string] = err.message; });
+      setErrors(newErrors);
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await api.register({ fullName: formData.fullName, email: formData.email, password: formData.password });
+      if (response.error) {
+        setErrors({ email: response.error });
+      } else {
+        router.push('/login?registered=true');
+      }
+    } catch (err) {
+      setErrors({ submit: 'Server error' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex bg-white">
-      
-      {/* Left Side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
-        <div className="w-full max-w-md">
-          
-          {/* Logo */}
-          <h2 className="text-xl font-bold text-indigo-600 mb-2">ArenaTicket</h2>
-          
-          {/* Title */}
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create your account</h1>
-          <p className="text-gray-500 mb-8 text-sm">Join the elite arena for competitive esports ticketing and event management.</p>
-
-          {/* Form */}
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            
-            {/* Full Name */}
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 uppercase mb-2">Full Name</label>
-              <input 
-                type="text" 
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-600 bg-white text-gray-900"
-                required
-              />
-            </div>
-
-            {/* Email */}
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 uppercase mb-2">Email Address</label>
-              <input 
-                type="email" 
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-600 bg-white text-gray-900"
-                required
-              />
-            </div>
-
-            {/* Password & Confirm Password */}
-            <div className="grid grid-cols-2 gap-4">
-              
-              {/* Password */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 uppercase mb-2">Password</label>
-                <input 
-                  type="password" 
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-600 bg-white text-gray-900"
-                  required
-                />
-              </div>
-
-              {/* Confirm Password */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 uppercase mb-2">Confirm Password</label>
-                <input 
-                  type="password" 
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-600 bg-white text-gray-900"
-                  required
-                />
-              </div>
-
-            </div>
-
-            {/* Terms Checkbox */}
-            <div className="flex items-center">
-              <input type="checkbox" id="terms" className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-600" required />
-              <label htmlFor="terms" className="ml-2 text-xs text-gray-600">
-                I agree to the <a href="#" className="text-indigo-600 hover:underline">Terms of Service</a> and <a href="#" className="text-indigo-600 hover:underline">Privacy Policy</a>.
-              </label>
-            </div>
-
-            {/* Register Button */}
-            <button type="submit" className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 font-medium">
-              Sign Up
-            </button>
-
-          </form>
-
-          {/* Login Link */}
-          <p className="text-center mt-6 text-sm text-gray-600">
-            Already have an account?{' '}
-            <Link href="/login" className="text-indigo-600 font-semibold hover:underline">
-              Login
-            </Link>
-          </p>
-
-        </div>
-      </div>
-
-      {/* Right Side - Logo */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gray-50 items-center justify-center p-12">
-        <div className="bg-white p-12 rounded-2xl shadow-lg">
-          <div className="w-24 h-24 bg-gradient-to-b from-purple-600 to-pink-500 rounded-xl flex items-center justify-center mx-auto mb-4">
-            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
-              <div className="w-8 h-8 bg-purple-600 rounded-full"></div>
-            </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-md">
+        <h1 className="text-2xl font-bold text-center mb-6">Register</h1>
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div>
+            <label className="block text-sm mb-1">Full Name</label>
+            <input name="fullName" value={formData.fullName} onChange={handleChange} className={`w-full border rounded px-3 py-2 ${errors.fullName ? 'border-red-500' : 'border-gray-300'}`} />
+            {errors.fullName && <p className="text-red-500 text-xs">{errors.fullName}</p>}
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 text-center">ArenaTicket</h2>
-        </div>
+          <div>
+            <label className="block text-sm mb-1">Email</label>
+            <input name="email" type="email" value={formData.email} onChange={handleChange} className={`w-full border rounded px-3 py-2 ${errors.email ? 'border-red-500' : 'border-gray-300'}`} />
+            {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
+          </div>
+          <div>
+            <label className="block text-sm mb-1">Password</label>
+            <input name="password" type="password" value={formData.password} onChange={handleChange} className={`w-full border rounded px-3 py-2 ${errors.password ? 'border-red-500' : 'border-gray-300'}`} />
+            {errors.password && <p className="text-red-500 text-xs">{errors.password}</p>}
+          </div>
+          <div>
+            <label className="block text-sm mb-1">Confirm Password</label>
+            <input name="confirm" type="password" value={formData.confirm} onChange={handleChange} className={`w-full border rounded px-3 py-2 ${errors.confirm ? 'border-red-500' : 'border-gray-300'}`} />
+            {errors.confirm && <p className="text-red-500 text-xs">{errors.confirm}</p>}
+          </div>
+          <button disabled={loading} className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50">
+            {loading ? 'Registering...' : 'Register'}
+          </button>
+          {errors.submit && <p className="text-red-500 text-center text-sm">{errors.submit}</p>}
+        </form>
+        <p className="text-center mt-4 text-sm">Already have an account? <Link href="/login" className="text-blue-600">Login</Link></p>
       </div>
-
     </div>
   );
 }
