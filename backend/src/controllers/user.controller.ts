@@ -1,36 +1,34 @@
 import { Request, Response } from 'express';
 import { UserService } from '../services/user.service';
-import { CreateUserDTO, LoginUserDTO } from '../dtos/user.dto';
 import { ApiResponseHelper } from '../utils/apihelper.util';
-
-const userService = new UserService();
+import { RegisterDTO, LoginDTO } from '../dtos/user.dto';
 
 export class UserController {
-  async register(req: Request, res: Response) {
+  static async register(req: Request, res: Response) {
     try {
-      const parsedData = CreateUserDTO.safeParse(req.body);
+      const parsedData = RegisterDTO.safeParse(req.body);
       if (!parsedData.success) {
-        return ApiResponseHelper.error(res, parsedData.error.errors[0].message, 400);
+        return ApiResponseHelper.error(res, parsedData.error.issues[0].message, 400);
       }
 
-      const user = await userService.createUser(parsedData.data);
-      return ApiResponseHelper.success(res, user, 'User registered successfully', 201);
+      const result = await UserService.register(parsedData.data);
+      return ApiResponseHelper.success(res, result, 'User registered successfully', 201);
     } catch (error: any) {
-      return ApiResponseHelper.error(res, error.message || 'Registration failed', error.status || 500);
+      return ApiResponseHelper.error(res, error.message, error.status || 500);
     }
   }
 
-  async login(req: Request, res: Response) {
+  static async login(req: Request, res: Response) {
     try {
-      const parsedData = LoginUserDTO.safeParse(req.body);
+      const parsedData = LoginDTO.safeParse(req.body);
       if (!parsedData.success) {
-        return ApiResponseHelper.error(res, parsedData.error.errors[0].message, 400);
+        return ApiResponseHelper.error(res, parsedData.error.issues[0].message, 400);
       }
 
-      const { user, token } = await userService.loginUser(parsedData.data);
-      return ApiResponseHelper.success(res, { user, token }, 'Login successful');
+      const result = await UserService.login(parsedData.data);
+      return ApiResponseHelper.success(res, result, 'Login successful', 200);
     } catch (error: any) {
-      return ApiResponseHelper.error(res, error.message || 'Login failed', error.status || 500);
+      return ApiResponseHelper.error(res, error.message, error.status || 500);
     }
   }
 }
