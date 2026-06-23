@@ -1,17 +1,4 @@
 {
-  "node": {
-    "406cc65c619dc3ab71d4977236030bdfb264a0e07d": {
-      "workers": {
-        "app/(auth)/login/page": {
-          "moduleId": "[project]/.next-internal/server/app/(auth)/login/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/lib/actions/auth-actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": false,
-          "exportedName": "handleLoginUser",
-          "filename": "src/lib/actions/auth-actions.ts"
-        }
-      },
-      "exportedName": "handleLoginUser",
-      "filename": "src/lib/actions/auth-actions.ts"
-    }
-  },
+  "node": {},
   "edge": {}
 }
