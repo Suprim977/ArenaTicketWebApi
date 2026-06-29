@@ -1,107 +1,53 @@
-import { Types } from "mongoose";
-import { IPersonDocument, PersonModel } from "../models/person.model";
-import { IUserDocument, UserModel } from "../models/user.model";
-import { UserRole } from "../types/user.type";
+import User from '../models/user.model';
+import { RegisterDto, UpdateProfileDto } from '../dtos/user.dto';
 
-export interface CreateUserInput {
-  email: string;
-  password: string;
-  role?: UserRole;
-  personData: {
-    firstName: string;
-    lastName: string;
-    arenaTag?: string;
-    avatar?: string;
-  };
-}
-
-export interface UpdateUserInput {
-  email?: string;
-  role?: UserRole;
-  password?: string;
-  personData?: Partial<Pick<IPersonDocument, "firstName" | "lastName" | "arenaTag" | "avatar">>;
-}
-
-class UserRepository {
-  async findByEmail(email: string): Promise<IUserDocument | null> {
-    return UserModel.findOne({ email: email.toLowerCase() }).populate("person");
+export class UserRepository {
+  static async findById(id: string) {
+    return await User.findById(id).select('-password');
   }
 
-  async findByEmailWithPassword(email: string): Promise<IUserDocument | null> {
-    return UserModel.findOne({ email: email.toLowerCase() }).select("+password").populate("person");
+  static async findByEmail(email: string) {
+    return await User.findOne({ email });
   }
 
-  async create(data: CreateUserInput): Promise<IUserDocument> {
-    const person = await PersonModel.create(data.personData);
-
-    return UserModel.create({
-      email: data.email.toLowerCase(),
-      password: data.password,
-      role: data.role || "user",
-      person: person._id,
-    });
+  static async create(data: RegisterDto) {
+    return await User.create(data);
   }
 
-  async findById(userId: string): Promise<IUserDocument | null> {
-    return UserModel.findById(userId).populate("person");
+  static async update(id: string, data: Partial<UpdateProfileDto> & { avatar?: string }) {
+    return await User.findByIdAndUpdate(id, data, { new: true }).select('-password');
   }
 
-  async findByIdWithPassword(userId: string): Promise<IUserDocument | null> {
-    return UserModel.findById(userId).select("+password").populate("person");
+  static async updatePassword(id: string, password: string) {
+    return await User.findByIdAndUpdate(id, { password }, { new: true });
   }
 
-  async paginate(page: number, limit: number): Promise<{ data: IUserDocument[]; total: number }> {
-    const skip = (page - 1) * limit;
-    const [data, total] = await Promise.all([
-      UserModel.find().sort({ createdAt: -1 }).skip(skip).limit(limit).populate("person"),
-      UserModel.countDocuments(),
-    ]);
-
-    return { data, total };
+  static async delete(id: string) {
+    return await User.findByIdAndDelete(id);
   }
 
-  async update(userId: string, payload: UpdateUserInput): Promise<IUserDocument | null> {
-    const user = await UserModel.findById(userId).select(payload.password ? "+password" : "");
-
-    if (!user) {
-      return null;
+  static async findWithPagination(page: number = 1, limit: number = 10, search?: string) {
+    const query: any = {};
+    if (search) {
+      query.$or = [
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
     }
-
-    if (payload.email) {
-      user.email = payload.email.toLowerCase();
-    }
-
-    if (payload.role) {
-      user.role = payload.role;
-    }
-
-    if (payload.password) {
-      user.password = payload.password;
-    }
-
-    await user.save();
-
-    if (payload.personData) {
-      await PersonModel.findByIdAndUpdate(user.person as Types.ObjectId, payload.personData, { new: true });
-    }
-
-    return this.findById(userId);
-  }
-
-  async delete(userId: string): Promise<boolean> {
-    const user = await UserModel.findById(userId);
-
-    if (!user) {
-      return false;
-    }
-
-    await Promise.all([
-      UserModel.findByIdAndDelete(userId),
-      PersonModel.findByIdAndDelete(user.person as Types.ObjectId),
-    ]);
-
-    return true;
+    
+    const total = await User.countDocuments(query);
+    const users = await User.find(query).select('-password')
+      .skip((page - 1) * limit).limit(limit).sort({ createdAt: -1 });
+      
+    return { 
+      data: users, 
+      meta: { 
+        page, 
+        limit, 
+        total, 
+        totalPages: Math.ceil(total / limit) 
+      } 
+    };
   }
 }
-
-export const userRepository = new UserRepository();
