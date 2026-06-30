@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { SECRET_KEY } from '../configs/constants';
+import { SECRET_KEY } from '../configs/constant';
 import { UserRepository } from '../repositories/user.repository';
 import { RegisterDto, LoginDto, UpdateProfileDto } from '../dtos/user.dto';
 import { HttpException } from '../exceptions/http-exception';

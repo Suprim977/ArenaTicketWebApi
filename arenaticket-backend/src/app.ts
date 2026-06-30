@@ -1,49 +1,30 @@
-import cors from "cors";
-import express, { NextFunction, Request, Response } from "express";
-import path from "path";
-import userRoute from "./routes/user.route";
-import adminUserRoute from "./routes/admin/user.route";
-import { HttpException } from "./exceptions/http-exception";
+import express from 'express';
+import cors from 'cors';
+import path from 'path';
+import userRoutes from './routes/user.route';
+import adminUserRoutes from './routes/admin/user.route';
 
 const app = express();
-const API_PREFIX = "/api/v1";
 
-app.use(cors());
+// CORS Configuration
+app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+
+// Static Files - Safely resolve uploads path
+const uploadPath = path.join(__dirname, '../uploads');
+app.use('/uploads', express.static(uploadPath));
+
+// Body Parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
-app.get("/", (_req: Request, res: Response) => {
-  res.json({
-    success: true,
-    message: "ArenaTicket API is running",
-  });
-});
+// Routes
+app.use('/api/v1/auth', userRoutes);
+app.use('/api/v1/admin/users', adminUserRoutes);
 
-app.get(API_PREFIX, (_req: Request, res: Response) => {
-  res.json({
-    success: true,
-    message: "ArenaTicket API v1 is running",
-  });
-});
-
-app.use(`${API_PREFIX}/auth`, userRoute);
-app.use(`${API_PREFIX}/admin/users`, adminUserRoute);
-
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  if (err instanceof HttpException) {
-    return res.status(err.statusCode).json({
-      success: false,
-      message: err.message,
-    });
-  }
-
-  console.error(err);
-
-  return res.status(500).json({
-    success: false,
-    message: "Internal server error",
-  });
+// Global Error Handler
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const status = err.status || 500;
+  res.status(status).json({ success: false, message: err.message || 'Internal Server Error' });
 });
 
 export default app;
