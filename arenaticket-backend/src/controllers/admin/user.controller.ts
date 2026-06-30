@@ -1,50 +1,53 @@
-import { NextFunction, Request, Response } from "express";
-import { sendPaginated, sendSuccess } from "../../utils/apihelper.util";
-import { userService } from "../../services/user.service";
+import { Request, Response } from 'express';
+import { UserService } from '../../services/user.service';
+import { ApiResponseHelper } from '../../utils/apihelper.util';
+import { RegisterDto, UpdateProfileDto } from '../../dtos/user.dto';
 
-export const getAllUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getAllUsersController = async (req: Request, res: Response) => {
   try {
-    const page = Number(req.query.page || 1);
-    const limit = Number(req.query.limit || 10);
-    const result = await userService.getAllUsers(page, limit);
-    sendPaginated(res, "Users fetched successfully", result.data, result.meta);
-  } catch (error) {
-    next(error);
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = req.query.search as string;
+    
+    const result = await UserService.getAllUsers(page, limit, search);
+    res.json({ success: true, data: result.data, meta: result.meta });
+  } catch (error: any) {
+    ApiResponseHelper.error(res, error.message, error.status || 500);
   }
 };
 
-export const getUserById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getUserByIdController = async (req: Request, res: Response) => {
   try {
-    const user = await userService.getUserById(req.params.id);
-    sendSuccess(res, "User fetched successfully", user);
-  } catch (error) {
-    next(error);
+    const user = await UserService.getUserById(req.params.id);
+    ApiResponseHelper.success(res, user);
+  } catch (error: any) {
+    ApiResponseHelper.error(res, error.message, error.status || 500);
   }
 };
 
-export const createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const createUserController = async (req: Request, res: Response) => {
   try {
-    const user = await userService.createUser(req.body);
-    sendSuccess(res, "User created successfully", user, 201);
-  } catch (error) {
-    next(error);
+    const user = await UserService.createUser(req.body as RegisterDto);
+    ApiResponseHelper.created(res, user, 'User created successfully');
+  } catch (error: any) {
+    ApiResponseHelper.error(res, error.message, error.status || 500);
   }
 };
 
-export const updateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const updateUserController = async (req: Request, res: Response) => {
   try {
-    const user = await userService.updateUser(req.params.id, req.body);
-    sendSuccess(res, "User updated successfully", user);
-  } catch (error) {
-    next(error);
+    const user = await UserService.updateUser(req.params.id, req.body as UpdateProfileDto);
+    ApiResponseHelper.success(res, user, 'User updated successfully');
+  } catch (error: any) {
+    ApiResponseHelper.error(res, error.message, error.status || 500);
   }
 };
 
-export const deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const deleteUserController = async (req: Request, res: Response) => {
   try {
-    await userService.deleteUser(req.params.id);
-    sendSuccess(res, "User deleted successfully");
-  } catch (error) {
-    next(error);
+    await UserService.deleteUser(req.params.id);
+    res.status(204).send();
+  } catch (error: any) {
+    ApiResponseHelper.error(res, error.message, error.status || 500);
   }
 };
