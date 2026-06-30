@@ -1,21 +1,21 @@
-import { Router } from "express";
+import { Router } from 'express';
 import {
-  createUser,
-  deleteUser,
-  getAllUsers,
-  getUserById,
-  updateUser,
-} from "../../controllers/admin/user.controller";
-import { adminGuard } from "../../middlewares/admin.guard";
-import { authorized } from "../../middlewares/authorized.middleware";
+  getAllUsersController, getUserByIdController, createUserController,
+  updateUserController, deleteUserController
+} from '../../controllers/admin/user.controller';
+import { authorizedMiddleware } from '../../middlewares/authorized.middleware';
+import { adminGuard } from '../../middlewares/admin.guard';
 
-const adminUserRoute = Router();
+const router = Router();
 
-adminUserRoute.use(authorized, adminGuard);
-adminUserRoute.get("/", getAllUsers);
-adminUserRoute.get("/:id", getUserById);
-adminUserRoute.post("/", createUser);
-adminUserRoute.put("/:id", updateUser);
-adminUserRoute.delete("/:id", deleteUser);
+// Apply auth + admin guard to ALL routes in this file
+router.use(authorizedMiddleware, adminGuard);
 
-export default adminUserRoute;
+router.get('/', getAllUsersController);
+router.get('/:id', getUserByIdController);
+router.post('/', createUserController);
+router.put('/:id', updateUserController);
+router.patch('/:id', updateUserController); // Support PATCH as well
+router.delete('/:id', deleteUserController);
+
+export default router;
