@@ -6,23 +6,23 @@ export const API_ENDPOINTS = {
     register: "/auth/register",
     forgotPassword: "/auth/forgot-password",
     resetPassword: "/auth/reset-password",
-    whoami: "/auth/profile",
-    update: "/auth/profile",
-    password: "/auth/change-password",
+    whoami: "/users/me",
+    update: "/users/me",
+    password: "/users/me/password",
   },
   events: {
-    list: "/tournaments",
-    byId: (id: string) => `/tournaments/${id}`,
-    categories: "/tournaments",
-    search: "/tournaments",
+    list: "/events",
+    byId: (id: string) => `/events/${id}`,
+    categories: "/events",
+    search: "/events",
   },
   bookings: {
-    list: "/tickets/my-tickets",
-    byRef: (bookingRef: string) => `/tickets/${bookingRef}`,
-    create: "/tickets",
+    list: "/bookings/my-bookings",
+    byRef: (bookingRef: string) => `/bookings/${bookingRef}`,
+    create: "/bookings",
   },
   tickets: {
-    byBookingRef: (bookingRef: string) => `/tickets/${bookingRef}`,
+    byBookingRef: (bookingRef: string) => `/bookings/${bookingRef}`,
   },
   adminUsers: {
     list: "/admin/users",
@@ -39,4 +39,5 @@ export const API_ENDPOINTS = {
   adminPayments: {
     list: "/admin/payments",
   },
+  payments: { initiate: "/payments/initiate" },
 } as const;

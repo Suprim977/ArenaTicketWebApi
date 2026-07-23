@@ -1,4 +1,6 @@
-export type AuthRole = "admin" | "user";
+import type { User, UserRole } from "./user";
+
+export type AuthRole = UserRole;
 
 export type AuthPerson = {
   firstName?: string;
@@ -7,10 +9,10 @@ export type AuthPerson = {
   avatar?: string;
 };
 
-export type AuthUser = {
+export type AuthUser = Partial<Omit<User, "role">> & {
   _id: string;
   email: string;
-  role: AuthRole;
+  role: UserRole;
   person?: AuthPerson;
 };
 

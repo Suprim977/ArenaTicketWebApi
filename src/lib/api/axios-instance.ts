@@ -1,13 +1,16 @@
 import axios, { AxiosError, type AxiosResponse, type InternalAxiosRequestConfig } from "axios";
+import Cookies from "js-cookie";
+import type { ApiEnvelope, ApiErrorBody } from "@/types/api";
 
-export type ApiSuccessResponse<T> = { ok?: boolean; message?: string; data?: T; meta?: { page: number; limit: number; total: number; totalPages: number } };
-export type ApiErrorResponse = { message?: string; errors?: Record<string, string[]> };
+export type ApiSuccessResponse<T> = ApiEnvelope<T>;
+export type ApiErrorResponse = ApiErrorBody;
 export type ApiResponse<T> = AxiosResponse<ApiSuccessResponse<T>>;
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000/api/v1";
 
 export const axiosInstance = axios.create({
   baseURL: apiBaseUrl,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
@@ -17,7 +20,7 @@ export const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("token");
+      const token = Cookies.get("token") ?? localStorage.getItem("token");
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -35,6 +38,9 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 401) {
       if (typeof window !== "undefined") {
         localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        Cookies.remove("token");
+        Cookies.remove("user_role");
         if (window.location.pathname !== "/login") window.location.assign("/login");
       }
     }

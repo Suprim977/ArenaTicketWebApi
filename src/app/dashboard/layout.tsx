@@ -2,57 +2,71 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useAuth } from "@/lib/contexts/AuthContext";
+import { CalendarDays, FolderOpen, History, KeyRound, LayoutDashboard, LogOut, Search, Shield, Ticket, UserRound } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useAuth } from "@/lib/contexts/AuthContext";
+
+const links = [
+  { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
+  { href: "/dashboard/events", label: "Events", icon: CalendarDays },
+  { href: "/dashboard/search", label: "Search", icon: Search },
+  { href: "/dashboard/categories", label: "Categories", icon: FolderOpen },
+  { href: "/dashboard/booking", label: "Booking", icon: Ticket },
+  { href: "/dashboard/history", label: "History", icon: History },
+  { href: "/dashboard/profile", label: "Profile", icon: UserRound },
+  { href: "/dashboard/password", label: "Password", icon: KeyRound },
+] as const;
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout } = useAuth();
-
-  const navLinks = [
-    { href: "/dashboard", label: "Overview" },
-    { href: "/events", label: "Events" },
-    { href: "/search", label: "Search" },
-    { href: "/categories", label: "Categories" },
-    { href: "/booking", label: "Booking" },
-    { href: "/history", label: "History" },
-    { href: "/dashboard/profile", label: "Profile" },
-    { href: "/dashboard/password", label: "Password" },
-    { href: "/admin/users", label: "Admin" },
-  ];
+  const { user, logout } = useAuth();
+  const navLinks = user?.role === "admin"
+    ? [...links, { href: "/dashboard/admin", label: "Admin", icon: Shield }]
+    : links;
 
   return (
-    <div className="min-h-screen bg-[#F3F4F6] dark:bg-slate-950">
-      <header className="border-b border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-4">
-          <h1 className="text-xl font-black text-gray-900 dark:text-white">ArenaTicket Dashboard</h1>
-          <nav className="flex items-center gap-2">
-            <ThemeToggle />
-            {navLinks.map((link) => (
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 lg:grid lg:grid-cols-[17rem_1fr]">
+      <aside className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r">
+        <div className="flex items-center justify-between px-5 py-5 lg:px-6">
+          <Link href="/dashboard" className="text-xl font-black tracking-tight text-slate-950 dark:text-white">
+            Arena<span className="text-indigo-600">Ticket</span>
+          </Link>
+          <ThemeToggle />
+        </div>
+        <nav aria-label="Dashboard navigation" className="flex gap-1 overflow-x-auto px-3 pb-4 lg:block lg:space-y-1 lg:px-4">
+          {navLinks.map(({ href, label, icon: Icon, ...item }) => {
+            const active = "exact" in item ? pathname === href : pathname.startsWith(href);
+            return (
               <Link
-                key={link.href}
-                href={link.href}
-                className={`rounded-lg px-3 py-2 text-sm font-medium ${
-                  pathname === link.href ? "bg-indigo-50 text-arena-indigo dark:bg-slate-800 dark:text-sky-300" : "text-gray-700 dark:text-slate-200"
+                key={href}
+                href={href}
+                aria-current={active ? "page" : undefined}
+                className={`flex shrink-0 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
+                  active
+                    ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/20"
+                    : "text-slate-600 hover:bg-indigo-50 hover:text-indigo-700 dark:text-slate-300 dark:hover:bg-slate-800"
                 }`}
               >
-                {link.label}
+                <Icon size={18} aria-hidden />
+                {label}
               </Link>
-            ))}
-            <button
-              onClick={() => {
-                logout();
-                router.push("/login");
-              }}
-              className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 dark:border-slate-700 dark:text-slate-200"
-            >
-              Logout
-            </button>
-          </nav>
+            );
+          })}
+        </nav>
+        <div className="hidden px-4 lg:absolute lg:inset-x-0 lg:bottom-5 lg:block">
+          <button
+            onClick={() => {
+              logout();
+              router.replace("/login");
+            }}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-rose-50 hover:text-rose-700 dark:text-slate-300 dark:hover:bg-rose-950/30"
+          >
+            <LogOut size={18} /> Logout
+          </button>
         </div>
-      </header>
-      <main className="mx-auto max-w-4xl px-6 py-8">{children}</main>
+      </aside>
+      <main className="min-w-0 px-4 py-8 sm:px-6 lg:px-10 lg:py-10">{children}</main>
     </div>
   );
 }
