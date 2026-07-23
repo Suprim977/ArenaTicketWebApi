@@ -1,8 +1,8 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { dashboardApi } from "@/lib/api/dashboard-api";
+import { createContext, useContext, useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { profileService } from "@/services/profile.service";
 import { deleteAuthCookies, setAuthCookies } from "@/lib/cookies";
 import type { AuthUser } from "@/types/auth";
 
@@ -19,6 +19,7 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const queryClient = useQueryClient();
   const [token, setToken] = useState<string | null>(() =>
     typeof window === "undefined" ? null : localStorage.getItem("token"),
   );
@@ -37,7 +38,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   });
   const profileQuery = useQuery({
     queryKey: ["current-user"],
-    queryFn: dashboardApi.getMe,
+    queryFn: profileService.getProfile,
     enabled: Boolean(token),
     retry: false,
   });
@@ -45,7 +46,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const effectiveUser = (profileQuery.data as AuthUser | undefined) ?? user;
 
   useEffect(() => {
-    if (profileQuery.data) localStorage.setItem("user", JSON.stringify(profileQuery.data));
+    if (profileQuery.data) {
+      localStorage.setItem("user", JSON.stringify(profileQuery.data));
+    }
   }, [profileQuery.data]);
 
   useEffect(() => {
@@ -66,20 +69,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     deleteAuthCookies();
+    queryClient.removeQueries({ queryKey: ["current-user"] });
   };
 
-  const value = useMemo(
-    () => ({
+  useEffect(() => {
+    const handleUnauthorized = () => logout();
+    window.addEventListener("auth:unauthorized", handleUnauthorized);
+    return () => window.removeEventListener("auth:unauthorized", handleUnauthorized);
+  });
+
+  const value = {
       token,
       user: effectiveUser,
       isAuthenticated: Boolean(token),
       isLoading: Boolean(token) && profileQuery.isLoading,
       login,
       logout,
-      setUser,
-    }),
-    [effectiveUser, profileQuery.isLoading, token],
-  );
+      setUser: (nextUser: AuthUser | null) => {
+        setUser(nextUser);
+        queryClient.setQueryData(["current-user"], nextUser);
+        if (nextUser) localStorage.setItem("user", JSON.stringify(nextUser));
+        else localStorage.removeItem("user");
+      },
+    };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

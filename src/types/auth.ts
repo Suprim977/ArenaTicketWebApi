@@ -10,7 +10,8 @@ export type AuthPerson = {
 };
 
 export type AuthUser = Partial<Omit<User, "role">> & {
-  _id: string;
+  _id?: string;
+  id?: string;
   email: string;
   role: UserRole;
   person?: AuthPerson;
@@ -24,7 +25,10 @@ export type AuthPayload = {
 export type RegisterPayload = AuthPayload & {
   firstName: string;
   lastName: string;
-  arenaTag?: string;
+  countryCode: string;
+  phoneNumber: string;
+  gender: import("./user").Gender;
+  confirmPassword: string;
 };
 
 export type ForgotPasswordPayload = {

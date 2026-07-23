@@ -36,25 +36,9 @@ export const loginAction = async (payload: AuthPayload): Promise<ActionResult<Au
 };
 
 export const registerAction = async (payload: RegisterPayload) => {
-  // Never log passwords or tokens; the remaining fields make registration failures traceable.
-  const logPayload = {
-    name: `${payload.firstName.trim()} ${payload.lastName.trim()}`,
-    email: payload.email.trim().toLowerCase(),
-  };
-  console.log("[registerAction] Sending registration request", logPayload);
-
   try {
-    const result = await authService.register(payload);
-    console.log("[registerAction] Backend response", { ok: result.ok, message: result.message, userId: result.data?.user._id });
-
-    if (!result.ok) {
-      console.error("[registerAction] Backend registration error", { message: result.message, payload: logPayload });
-    }
-
-    await persistSession(result);
-    return result;
+    return await authService.register(payload);
   } catch (error) {
-    console.error("[registerAction] Unexpected registration error", { error, payload: logPayload });
     return { ok: false, message: error instanceof Error ? error.message : "Unable to register right now. Please try again." };
   }
 };

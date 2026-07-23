@@ -1,24 +1,16 @@
-import { AxiosError } from "axios";
 import { axiosInstance, type ApiResponse } from "@/lib/api/axios-instance";
 import { API_ENDPOINTS } from "@/lib/api/endpoints";
+import { getApiErrorMessage } from "@/lib/api/error-message";
 import type { ActionResult, AuthPayload, AuthResponse, AuthUser, ForgotPasswordPayload, RegisterPayload, ResetPasswordPayload, UpdatePasswordPayload } from "@/types/auth";
 
 const authorization = (token?: string) => (token ? { Authorization: `Bearer ${token}` } : undefined);
-
-const messageFor = (error: unknown) => {
-  if (!(error instanceof AxiosError)) return "Request failed";
-  if (typeof error.response?.data?.message === "string") return error.response.data.message;
-  if (error.response?.data?.errors) return Object.values(error.response.data.errors).flat().join(" ");
-  if (error.code === "ECONNREFUSED" || error.code === "ERR_NETWORK") return "Cannot reach the ArenaTicket server. Please try again shortly.";
-  return "Request failed";
-};
 
 const request = async <T>(operation: () => Promise<ApiResponse<T>>): Promise<ActionResult<T>> => {
   try {
     const response = await operation();
     return { ok: true, message: response.data.message ?? "Request completed", data: response.data.data };
   } catch (error) {
-    return { ok: false, message: messageFor(error) };
+    return { ok: false, message: getApiErrorMessage(error, "Request failed") };
   }
 };
 
@@ -47,10 +39,15 @@ const authRequest = async (operation: () => Promise<ApiResponse<BackendAuthRespo
 
 export const authService = {
   login: (payload: AuthPayload) => authRequest(() => axiosInstance.post(API_ENDPOINTS.auth.login, payload)),
-  register: (payload: RegisterPayload) => authRequest(() => axiosInstance.post(API_ENDPOINTS.auth.register, {
-    name: `${payload.firstName.trim()} ${payload.lastName.trim()}`,
+  register: (payload: RegisterPayload) => request<null>(() => axiosInstance.post(API_ENDPOINTS.auth.register, {
+    firstName: payload.firstName.trim(),
+    lastName: payload.lastName.trim(),
+    countryCode: payload.countryCode,
+    phoneNumber: payload.phoneNumber.replace(/\s/g, ""),
+    gender: payload.gender,
     email: payload.email.trim().toLowerCase(),
     password: payload.password,
+    confirmPassword: payload.confirmPassword,
   })),
   forgotPassword: (payload: ForgotPasswordPayload) => request<null>(() => axiosInstance.post(API_ENDPOINTS.auth.forgotPassword, payload)),
   resetPassword: (payload: ResetPasswordPayload) => request<null>(() => axiosInstance.post(API_ENDPOINTS.auth.resetPassword, payload)),

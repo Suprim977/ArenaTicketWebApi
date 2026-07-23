@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import ThemeToggle from "@/components/ThemeToggle";
+import Logo from "@/app/__components/Logo";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -28,7 +29,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="grid min-h-screen bg-[#F3F4F6] dark:bg-slate-950 md:grid-cols-[250px_1fr]">
       <aside className="border-r border-gray-200 bg-white px-6 py-8 dark:border-slate-800 dark:bg-slate-900">
-        <h2 className="text-xl font-black text-gray-900 dark:text-white">Arena Admin</h2>
+        <Logo />
         <p className="mt-1 text-xs tracking-[0.14em] text-gray-500 dark:text-slate-400">CONTROL ROOM</p>
         <div className="mt-6">
           <ThemeToggle />

@@ -15,5 +15,6 @@ export interface ApiEnvelope<T> {
 
 export interface ApiErrorBody {
   message?: string;
-  errors?: Record<string, string[]>;
+  error?: unknown;
+  errors?: unknown;
 }

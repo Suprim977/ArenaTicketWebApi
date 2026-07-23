@@ -6,7 +6,7 @@ export type ApiSuccessResponse<T> = ApiEnvelope<T>;
 export type ApiErrorResponse = ApiErrorBody;
 export type ApiResponse<T> = AxiosResponse<ApiSuccessResponse<T>>;
 
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000/api/v1";
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8089/api/v1";
 
 export const axiosInstance = axios.create({
   baseURL: apiBaseUrl,
@@ -35,12 +35,15 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error: AxiosError<ApiErrorResponse>) => {
     // Handle 401 Unauthorized (expired/invalid token)
-    if (error.response?.status === 401) {
+    const isPublicAuthRequest = ["/auth/login", "/auth/register", "/auth/forgot-password", "/auth/reset-password"]
+      .some((path) => error.config?.url?.includes(path));
+    if (error.response?.status === 401 && !isPublicAuthRequest) {
       if (typeof window !== "undefined") {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         Cookies.remove("token");
         Cookies.remove("user_role");
+        window.dispatchEvent(new Event("auth:unauthorized"));
         if (window.location.pathname !== "/login") window.location.assign("/login");
       }
     }

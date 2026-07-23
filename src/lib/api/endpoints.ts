@@ -6,8 +6,8 @@ export const API_ENDPOINTS = {
     register: "/auth/register",
     forgotPassword: "/auth/forgot-password",
     resetPassword: "/auth/reset-password",
-    whoami: "/users/me",
-    update: "/users/me",
+    whoami: "/users/profile",
+    update: "/users/profile",
     password: "/users/me/password",
   },
   events: {
@@ -38,6 +38,11 @@ export const API_ENDPOINTS = {
   },
   adminPayments: {
     list: "/admin/payments",
+  },
+  profile: {
+    get: "/users/profile",
+    update: "/users/profile",
+    photo: "/users/profile/photo",
   },
   payments: { initiate: "/payments/initiate" },
 } as const;

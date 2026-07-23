@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { CalendarDays, FolderOpen, History, KeyRound, LayoutDashboard, LogOut, Search, Shield, Ticket, UserRound } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import Logo from "@/app/__components/Logo";
 
 const links = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
@@ -29,9 +30,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 lg:grid lg:grid-cols-[17rem_1fr]">
       <aside className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r">
         <div className="flex items-center justify-between px-5 py-5 lg:px-6">
-          <Link href="/dashboard" className="text-xl font-black tracking-tight text-slate-950 dark:text-white">
-            Arena<span className="text-indigo-600">Ticket</span>
-          </Link>
+          <Logo />
           <ThemeToggle />
         </div>
         <nav aria-label="Dashboard navigation" className="flex gap-1 overflow-x-auto px-3 pb-4 lg:block lg:space-y-1 lg:px-4">

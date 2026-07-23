@@ -5,10 +5,10 @@ import type { Booking } from "@/types/booking";
 import type { CreateBookingPayload } from "@/types/booking";
 import type { Event, EventFilters } from "@/types/event";
 import type { InitiatePaymentPayload, Payment } from "@/types/payment";
-import type { UpdateUserPayload, User } from "@/types/user";
+import type { User } from "@/types/user";
+import { profileService } from "@/services/profile.service";
 
 type ListPayload<T> = T[] | { data: T[]; events?: T[]; bookings?: T[] };
-type UserPayload = User | { user: User };
 type ItemPayload<T> = T | { event?: T; booking?: T; payment?: T };
 
 const unwrap = <T>(payload: T | ApiEnvelope<T>): T => {
@@ -34,11 +34,6 @@ const unwrapItem = <T>(payload: ItemPayload<T> | ApiEnvelope<ItemPayload<T>>): T
   return value as T;
 };
 
-const unwrapUser = (payload: UserPayload | ApiEnvelope<UserPayload>): User => {
-  const value = unwrap<UserPayload>(payload);
-  return "user" in value ? value.user : value;
-};
-
 type BackendEvent = Event & {
   location?: string;
   imageUrl?: string;
@@ -62,9 +57,7 @@ const normalizeEvent = (event: BackendEvent): Event => {
 };
 
 export const dashboardApi = {
-  getMe: async () => {
-    return unwrapUser((await axiosInstance.get(API_ENDPOINTS.auth.whoami)).data);
-  },
+  getMe: profileService.getProfile,
   getEvents: async (filters: EventFilters = {}) =>
     unwrapList<BackendEvent>((await axiosInstance.get(API_ENDPOINTS.events.list, { params: filters })).data).map(normalizeEvent),
   getEvent: async (id: string) =>
@@ -81,8 +74,7 @@ export const dashboardApi = {
     unwrapItem<Booking>((await axiosInstance.post(API_ENDPOINTS.bookings.create, payload)).data),
   initiatePayment: async (payload: InitiatePaymentPayload) =>
     unwrapItem<Payment>((await axiosInstance.post(API_ENDPOINTS.payments.initiate, payload)).data),
-  updateMe: async (payload: UpdateUserPayload) =>
-    unwrapUser((await axiosInstance.put(API_ENDPOINTS.auth.update, payload)).data),
+  updateMe: profileService.updateProfile,
   updatePassword: async (payload: { currentPassword: string; newPassword: string }) =>
     axiosInstance.put(API_ENDPOINTS.auth.password, payload),
   getAdminUsers: async () =>
