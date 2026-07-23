@@ -1,7 +1,8 @@
 "use client";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { CreditCard, Smartphone } from "lucide-react";
+import Image from "next/image";
+import { CreditCard } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -73,9 +74,9 @@ function BookingContent() {
           <div>
             <h2 className="font-bold">Payment method</h2>
             <div className="mt-3 grid gap-3 sm:grid-cols-3">
-              {([["esewa", Smartphone], ["khalti", Smartphone], ["card", CreditCard]] as const).map(([value, Icon]) => (
-                <button key={value} onClick={() => setMethod(value)} className={`flex items-center justify-center gap-2 rounded-xl border p-4 font-bold capitalize ${method === value ? "border-indigo-600 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40" : "border-slate-200 dark:border-slate-700"}`}><Icon size={19} />{value}</button>
-              ))}
+              <button onClick={() => setMethod("esewa")} className={`flex items-center justify-center gap-2 rounded-xl border p-4 font-bold ${method === "esewa" ? "border-indigo-600 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40" : "border-slate-200 dark:border-slate-700"}`}><Image src="/esewa.svg" alt="" width={22} height={22} />eSewa</button>
+              <button onClick={() => setMethod("khalti")} className={`flex items-center justify-center gap-2 rounded-xl border p-4 font-bold ${method === "khalti" ? "border-indigo-600 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40" : "border-slate-200 dark:border-slate-700"}`}><Image src="/khalti.jpg" alt="" width={24} height={24} className="size-6 rounded-md object-cover" />Khalti</button>
+              <button onClick={() => setMethod("card")} className={`flex items-center justify-center gap-2 rounded-xl border p-4 font-bold ${method === "card" ? "border-indigo-600 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40" : "border-slate-200 dark:border-slate-700"}`}><CreditCard size={21} />Card</button>
             </div>
           </div>
         </div>
