@@ -29,7 +29,13 @@ type BackendTournament = {
   maxTeams: number;
 };
 
-type TournamentList = { data: BackendTournament[] };
+type TournamentList =
+  | BackendTournament[]
+  | {
+      data?: BackendTournament[];
+      events?: BackendTournament[];
+      tournaments?: BackendTournament[];
+    };
 type BackendTicket = { _id: string; tournament?: { title?: string } | string; price: number; status: "PENDING" | "CONFIRMED" | "CANCELLED"; createdAt: string };
 
 const toArenaEvent = (tournament: BackendTournament): ArenaEvent => {
@@ -52,7 +58,10 @@ const toArenaEvent = (tournament: BackendTournament): ArenaEvent => {
 const listTournaments = async (token?: string): Promise<ArenaResult<ArenaEvent[]>> => {
   const result = await request<TournamentList>(() => axiosInstance.get(API_ENDPOINTS.events.list, { headers: authorization(token) }));
   if (!result.data) return { ok: false, message: result.message };
-  return { ok: true, message: result.message, data: result.data.data.map(toArenaEvent) };
+  const tournaments = Array.isArray(result.data)
+    ? result.data
+    : result.data.data ?? result.data.events ?? result.data.tournaments ?? [];
+  return { ok: true, message: result.message, data: tournaments.map(toArenaEvent) };
 };
 
 export const arenaService = {
