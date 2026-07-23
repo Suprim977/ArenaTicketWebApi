@@ -13,7 +13,7 @@ export default function AdminEventsPage() {
         <StatCard label="Drafts" value="6" helper="Waiting on approval" />
         <StatCard label="Sold out" value="4" helper="Fully booked events" />
       </div>
-      <div className="rounded-[1.5rem] border border-gray-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <p className="text-sm text-gray-600 dark:text-slate-300">Event CRUD forms can be connected to your backend endpoints here.</p>
       </div>
     </section>

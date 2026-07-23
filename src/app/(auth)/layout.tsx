@@ -5,9 +5,9 @@ import Logo from "../__components/Logo";
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-slate-100 p-3 dark:bg-slate-950 sm:p-6">
-      <div className="mx-auto grid min-h-[calc(100vh-1.5rem)] max-w-[1440px] overflow-hidden bg-white shadow-2xl dark:bg-slate-900 dark:shadow-black/30 sm:min-h-[calc(100vh-3rem)] lg:grid-cols-[1.3fr_0.7fr]">
+      <div className="mx-auto grid min-h-[calc(100vh-1.5rem)] max-w-360 overflow-hidden bg-white shadow-2xl dark:bg-slate-900 dark:shadow-black/30 sm:min-h-[calc(100vh-3rem)] lg:grid-cols-[1.3fr_0.7fr]">
         <aside className="relative hidden overflow-hidden bg-[#eef3ff] p-12 dark:bg-slate-900 lg:flex lg:flex-col lg:items-center lg:justify-center">
-          <div aria-hidden="true" className="absolute inset-0 opacity-50 [background-image:radial-gradient(#2563eb_1px,transparent_1px)] [background-size:28px_28px]" />
+          <div aria-hidden="true" className="absolute inset-0 opacity-50 bg-[radial-gradient(#2563eb_1px,transparent_1px)] bg-size-[28px_28px]" />
           <div className="relative w-full max-w-sm text-center">
             <div className="rounded-2xl bg-white px-10 py-12 shadow-xl shadow-blue-950/10 dark:bg-slate-800">
               <div className="flex justify-center"><Logo /></div>

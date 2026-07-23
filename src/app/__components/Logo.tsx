@@ -8,7 +8,7 @@ export default function Logo() {
   const { isAuthenticated } = useAuth();
   return (
     <Link href={isAuthenticated ? "/dashboard" : "/"} className="inline-flex items-center gap-3" aria-label="ArenaTicket home">
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-fuchsia-500 to-indigo-500 text-white shadow-sm">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-fuchsia-500 to-indigo-500 text-white shadow-sm">
         <Ticket className="h-5 w-5" />
       </div>
       <div>

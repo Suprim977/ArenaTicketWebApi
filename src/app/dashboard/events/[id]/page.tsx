@@ -19,7 +19,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
   return (
     <section className="mx-auto max-w-5xl space-y-7">
       <Link href="/dashboard/events" className="text-sm font-semibold text-indigo-600">← Back to events</Link>
-      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-700 to-violet-800 p-8 text-white sm:p-12">
+      <div className="overflow-hidden rounded-3xl bg-linear-to-br from-indigo-700 to-violet-800 p-8 text-white sm:p-12">
         <p className="text-xs font-bold uppercase tracking-widest text-indigo-200">{event.category}</p>
         <h1 className="mt-3 text-4xl font-black sm:text-5xl">{event.title}</h1>
         <p className="mt-5 max-w-3xl text-indigo-100">{event.description}</p>

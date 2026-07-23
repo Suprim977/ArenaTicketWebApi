@@ -13,7 +13,7 @@ export default function AdminPaymentsPage() {
         <StatCard label="Success rate" value="98.7%" helper="Processed payments" />
         <StatCard label="Refunds" value="17" helper="Recent refunds" />
       </div>
-      <div className="rounded-[1.5rem] border border-gray-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <p className="text-sm text-gray-600 dark:text-slate-300">Payment rows and reconciliation tools can be wired into the API here.</p>
       </div>
     </section>

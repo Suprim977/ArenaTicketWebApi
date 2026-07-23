@@ -15,7 +15,7 @@ export default function EventFilterBar({ categories }: EventFilterBarProps) {
   const reset = useEventFiltersStore((state) => state.reset);
 
   return (
-    <div className="grid gap-4 rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 md:grid-cols-[1.3fr_0.7fr_auto] md:items-end">
+    <div className="grid gap-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 md:grid-cols-[1.3fr_0.7fr_auto] md:items-end">
       <label className="space-y-2">
         <span className="label-mini">Search</span>
         <input

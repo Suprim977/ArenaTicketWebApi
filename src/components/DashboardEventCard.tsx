@@ -9,7 +9,7 @@ export default function DashboardEventCard({ event }: { event: Event }) {
 
   return (
     <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900">
-      <div className="h-2 bg-gradient-to-r from-indigo-600 to-violet-600" />
+      <div className="h-2 bg-linear-to-r from-indigo-600 to-violet-600" />
       <div className="p-5">
         <div className="flex items-start justify-between gap-3">
           <p className="text-xs font-bold uppercase tracking-widest text-indigo-600">{event.category}</p>

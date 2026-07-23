@@ -13,7 +13,7 @@ export default function AdminBookingsPage() {
         <StatCard label="Pending" value="42" helper="Awaiting payment" />
         <StatCard label="Cancelled" value="13" helper="User cancellations" />
       </div>
-      <div className="rounded-[1.5rem] border border-gray-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <p className="text-sm text-gray-600 dark:text-slate-300">Booking management tables can be connected to the backend here.</p>
       </div>
     </section>

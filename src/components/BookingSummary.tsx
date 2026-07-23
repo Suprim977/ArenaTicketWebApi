@@ -16,7 +16,7 @@ export default function BookingSummary({ event, seatType, quantity }: BookingSum
   const total = event.priceFrom * quantity;
 
   return (
-    <aside className="rounded-[2rem] border border-slate-200 bg-gradient-to-br from-sky-50 to-white p-6 shadow-card dark:border-slate-800 dark:from-slate-900 dark:to-slate-950">
+    <aside className="rounded-4xl border border-slate-200 bg-linear-to-br from-sky-50 to-white p-6 shadow-card dark:border-slate-800 dark:from-slate-900 dark:to-slate-950">
       <p className="label-mini">Summary</p>
       <h3 className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{event.title}</h3>
       <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{event.venue} · {event.city}</p>

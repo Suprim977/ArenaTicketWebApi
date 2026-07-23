@@ -17,7 +17,7 @@ export default function DigitalTicketPage({ params }: { params: Promise<{ ref: s
   return (
     <section className="mx-auto max-w-4xl">
       <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900">
-        <header className="bg-gradient-to-r from-indigo-700 to-violet-700 px-7 py-6 text-white">
+        <header className="bg-linear-to-r from-indigo-700 to-violet-700 px-7 py-6 text-white">
           <p className="text-xs font-bold uppercase tracking-[.25em] text-indigo-200">ArenaTicket · Digital Entry</p>
           <h1 className="mt-2 text-3xl font-black">{booking.event?.title ?? "Tournament Ticket"}</h1>
         </header>

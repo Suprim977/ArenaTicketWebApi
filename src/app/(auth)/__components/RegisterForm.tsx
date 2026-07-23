@@ -47,7 +47,7 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="space-y-6 lg:min-w-[34rem]">
+    <div className="space-y-6 lg:min-w-136">
       <div className="space-y-2">
         <p className="label-mini">Create Account</p>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Join ArenaTicket</h2>

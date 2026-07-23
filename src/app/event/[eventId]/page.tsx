@@ -31,7 +31,7 @@ export default function EventDetailPage({ params }: { params: { eventId: string 
   if (!event) {
     return (
       <main className="mx-auto min-h-screen max-w-4xl px-6 py-10">
-        <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-card dark:border-slate-800 dark:bg-slate-900">
+        <div className="rounded-4xl border border-slate-200 bg-white p-8 shadow-card dark:border-slate-800 dark:bg-slate-900">
           <p className="label-mini">Event details</p>
           <h1 className="mt-3 text-3xl font-black text-slate-900 dark:text-white">Event not found</h1>
         </div>
@@ -41,7 +41,7 @@ export default function EventDetailPage({ params }: { params: { eventId: string 
 
   return (
     <main className="mx-auto min-h-screen max-w-5xl px-6 py-10">
-      <section className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-card dark:border-slate-800 dark:bg-slate-900">
+      <section className="rounded-4xl border border-slate-200 bg-white p-8 shadow-card dark:border-slate-800 dark:bg-slate-900">
         <p className="label-mini">Event details</p>
         <h1 className="mt-3 text-4xl font-black tracking-tight text-slate-900 dark:text-white">{event.title}</h1>
         <p className="mt-4 max-w-3xl text-base leading-7 text-slate-600 dark:text-slate-300">{event.description}</p>
