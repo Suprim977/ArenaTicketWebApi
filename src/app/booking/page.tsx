@@ -75,7 +75,7 @@ export default function BookingPage() {
   };
 
   if (loading) {
-    return <main className="mx-auto min-h-screen max-w-6xl px-6 py-10"><p className="rounded-[1.5rem] border border-slate-200 bg-white p-6 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">Loading booking flow...</p></main>;
+    return <main className="mx-auto min-h-screen max-w-6xl px-6 py-10"><p className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">Loading booking flow...</p></main>;
   }
 
   return (
@@ -87,7 +87,7 @@ export default function BookingPage() {
       />
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-card dark:border-slate-800 dark:bg-slate-900">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 rounded-4xl border border-slate-200 bg-white p-6 shadow-card dark:border-slate-800 dark:bg-slate-900">
           <div>
             <label className="label-mini">Event</label>
             <select className="input-shell mt-1" {...register("eventId", { onChange: (event) => setValue("eventId", event.target.value) })}>
