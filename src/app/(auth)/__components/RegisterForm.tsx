@@ -55,8 +55,8 @@ export default function RegisterForm() {
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <div className="grid gap-4 sm:grid-cols-2">
-          <div><label className="label-mini" htmlFor="firstName">First name</label><input id="firstName" autoComplete="given-name" className="input-shell mt-1" placeholder="Suprim" {...register("firstName")} /><ErrorText message={errors.firstName?.message} /></div>
-          <div><label className="label-mini" htmlFor="lastName">Last name</label><input id="lastName" autoComplete="family-name" className="input-shell mt-1" placeholder="Panta" {...register("lastName")} /><ErrorText message={errors.lastName?.message} /></div>
+          <div><label className="label-mini" htmlFor="firstName">First name</label><input id="firstName" autoComplete="given-name" className="input-shell mt-1" {...register("firstName")} /><ErrorText message={errors.firstName?.message} /></div>
+          <div><label className="label-mini" htmlFor="lastName">Last name</label><input id="lastName" autoComplete="family-name" className="input-shell mt-1" {...register("lastName")} /><ErrorText message={errors.lastName?.message} /></div>
         </div>
         <div className="grid gap-4 sm:grid-cols-[11rem_1fr]">
           <div><label className="label-mini" htmlFor="countryCode">Country code</label><select id="countryCode" className="input-shell mt-1" {...register("countryCode")}><option value="+977">Nepal (+977)</option><option value="+91">India (+91)</option><option value="+1">United States (+1)</option><option value="+44">United Kingdom (+44)</option></select></div>
