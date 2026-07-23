@@ -41,7 +41,7 @@ export default function ResetPasswordForm() {
     <div className="space-y-6">
       <div className="space-y-2">
         <p className="label-mini">New Password</p>
-        <h2 className="text-2xl font-bold text-gray-900">Choose a new ArenaTicket password</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Choose a new ArenaTicket password</h2>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -64,7 +64,7 @@ export default function ResetPasswordForm() {
         </button>
       </form>
 
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-gray-600 dark:text-slate-300">
         Return to sign in{" "}
         <Link href="/login" className="font-semibold text-arena-indigo">
           Login

@@ -42,10 +42,10 @@ export default function LoginForm() {
     <div className="space-y-6">
       <div className="space-y-2">
         <p className="label-mini">Sign In</p>
-        <h2 className="text-2xl font-bold text-gray-900">Continue to ArenaTicket</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Continue to ArenaTicket</h2>
       </div>
 
-      <button type="button" className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700">
+      <button type="button" className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
         Continue with Google
       </button>
 
@@ -69,7 +69,7 @@ export default function LoginForm() {
         </button>
       </form>
 
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-gray-600 dark:text-slate-300">
         New here?{" "}
         <Link href="/register" className="font-semibold text-arena-indigo">
           Sign Up
