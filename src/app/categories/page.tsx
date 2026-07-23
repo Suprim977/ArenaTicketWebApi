@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { getCategoriesAction } from "@/lib/actions/arena-action";
 import SectionHeader from "@/components/SectionHeader";
-import { mockCategories } from "@/lib/mock/arena-data";
 
-export default function CategoriesPage() {
+export default async function CategoriesPage() {
+  const result = await getCategoriesAction();
+  const categories = result.data ?? [];
   return (
     <main className="mx-auto min-h-screen max-w-6xl space-y-8 px-6 py-10">
       <SectionHeader
@@ -12,7 +14,7 @@ export default function CategoriesPage() {
       />
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {mockCategories.map((category) => (
+        {categories.map((category) => (
           <Link
             key={category.name}
             href={`/search?category=${category.name}`}

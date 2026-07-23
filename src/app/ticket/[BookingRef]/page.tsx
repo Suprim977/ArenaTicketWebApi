@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import TicketQR from "@/components/TicketQR";
 import { getBookingByRefAction } from "@/lib/actions/arena-action";
-import { mockBookings } from "@/lib/mock/arena-data";
 import type { Booking } from "@/types/arena";
 
 const currency = new Intl.NumberFormat("en-NG", {
@@ -26,7 +25,7 @@ export default function TicketDetailPage({ params }: { params: { bookingRef: str
 
       const storedBookings: Booking[] = JSON.parse(localStorage.getItem("arenaticket-bookings") || "[]");
       const storedLastBooking = JSON.parse(localStorage.getItem("arenaticket-last-booking") || "null") as Booking | null;
-      const found = [...storedBookings, ...(storedLastBooking ? [storedLastBooking] : []), ...mockBookings].find(
+      const found = [...storedBookings, ...(storedLastBooking ? [storedLastBooking] : [])].find(
         (item) => item.bookingRef === params.bookingRef,
       );
       setBooking(found || null);
@@ -91,7 +90,7 @@ export default function TicketDetailPage({ params }: { params: { bookingRef: str
             <Link href="/history" className="primary-btn">
               Booking history
             </Link>
-            <Link href="/events" className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+            <Link href="/search" className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
               Explore events
             </Link>
           </div>

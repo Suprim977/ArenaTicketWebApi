@@ -14,7 +14,7 @@ export default function EventAccessLink({ children, className, showArrow = false
   const { user, token } = useAuth();
 
   const openEvents = () => {
-    router.push(user || token ? "/events" : "/login?callbackUrl=/events");
+    router.push(user || token ? "/search" : "/login?callbackUrl=/search");
   };
 
   return <button type="button" onClick={openEvents} className={className}>{children}{showArrow ? " →" : null}</button>;

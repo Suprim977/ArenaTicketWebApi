@@ -1,11 +1,12 @@
 "use client";
 
-import { Suspense, useEffect, useMemo } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import SectionHeader from "@/components/SectionHeader";
 import EventCard from "@/components/EventCard";
 import EventFilterBar from "@/components/EventFilterBar";
-import { mockCategories, mockEvents } from "@/lib/mock/arena-data";
+import { getEventsAction } from "@/lib/actions/arena-action";
+import type { ArenaEvent, EventCategorySummary } from "@/types/arena";
 import { useEventFiltersStore } from "@/store/useEventFiltersStore";
 
 export default function SearchPage() {
@@ -21,6 +22,8 @@ function SearchContent() {
   const query = useEventFiltersStore((state) => state.query);
   const category = useEventFiltersStore((state) => state.category);
   const setCategory = useEventFiltersStore((state) => state.setCategory);
+  const [events, setEvents] = useState<ArenaEvent[]>([]);
+  const [categories, setCategories] = useState<EventCategorySummary[]>([]);
 
   useEffect(() => {
     const categoryParam = searchParams.get("category");
@@ -29,13 +32,21 @@ function SearchContent() {
     }
   }, [searchParams, setCategory]);
 
+  useEffect(() => {
+    void getEventsAction().then((result) => {
+      const apiEvents = result.data ?? [];
+      setEvents(apiEvents);
+      setCategories([{ name: "Festival", label: "Tournaments", description: "Live tournaments from the API.", count: apiEvents.length }]);
+    });
+  }, []);
+
   const filteredEvents = useMemo(() => {
-    return mockEvents.filter((event) => {
+    return events.filter((event) => {
       const matchesQuery = [event.title, event.venue, event.city, event.description].join(" ").toLowerCase().includes(query.toLowerCase());
       const matchesCategory = category === "all" || event.category === category;
       return matchesQuery && matchesCategory;
     });
-  }, [category, query]);
+  }, [category, events, query]);
 
   return (
     <main className="mx-auto min-h-screen max-w-6xl space-y-8 px-6 py-10">
@@ -45,7 +56,7 @@ function SearchContent() {
         description="Use the search box to narrow events by venue, city, or title, then jump straight into the detail page."
       />
 
-      <EventFilterBar categories={mockCategories} />
+      <EventFilterBar categories={categories} />
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {filteredEvents.map((event) => <EventCard key={event.id} event={event} />)}

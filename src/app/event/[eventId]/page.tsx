@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getEventByIdAction } from "@/lib/actions/arena-action";
-import { mockEvents } from "@/lib/mock/arena-data";
 import type { ArenaEvent } from "@/types/arena";
 
 const currency = new Intl.NumberFormat("en-NG", {
@@ -23,7 +22,7 @@ export default function EventDetailPage({ params }: { params: { eventId: string 
         return;
       }
 
-      setEvent(mockEvents.find((item) => item.id === params.eventId) || null);
+      setEvent(null);
     };
 
     void load();
@@ -70,7 +69,7 @@ export default function EventDetailPage({ params }: { params: { eventId: string 
           <Link href="/booking" className="primary-btn">
             Buy Ticket
           </Link>
-          <Link href="/events" className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+          <Link href="/search" className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
             Back to events
           </Link>
         </div>

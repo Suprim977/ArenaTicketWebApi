@@ -7,13 +7,12 @@ import { useForm, useWatch } from "react-hook-form";
 import SectionHeader from "@/components/SectionHeader";
 import BookingSummary from "@/components/BookingSummary";
 import { createBookingAction, getEventsAction } from "@/lib/actions/arena-action";
-import { mockEvents } from "@/lib/mock/arena-data";
 import { bookingSchema, type BookingSchemaInput, type BookingSchemaType } from "@/lib/schemas/booking-schema";
 import type { ArenaEvent } from "@/types/arena";
 
 export default function BookingPage() {
   const router = useRouter();
-  const [events, setEvents] = useState<ArenaEvent[]>(mockEvents);
+  const [events, setEvents] = useState<ArenaEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [apiError, setApiError] = useState("");
@@ -27,7 +26,7 @@ export default function BookingPage() {
   } = useForm<BookingSchemaInput, unknown, BookingSchemaType>({
     resolver: zodResolver(bookingSchema),
     defaultValues: {
-      eventId: mockEvents[0].id,
+      eventId: "",
       seatType: "General",
       quantity: 1,
       attendeeName: "Jordan Fan",
@@ -42,9 +41,7 @@ export default function BookingPage() {
   useEffect(() => {
     const loadEvents = async () => {
       const result = await getEventsAction();
-      if (result.data?.length) {
-        setEvents(result.data);
-      }
+      setEvents(result.data ?? []);
       setLoading(false);
     };
 
@@ -57,7 +54,13 @@ export default function BookingPage() {
     setApiError("");
     setSubmitLoading(true);
 
-    const result = await createBookingAction(values);
+    if (!selectedEvent) {
+      setApiError("No tournament is available to book.");
+      setSubmitLoading(false);
+      return;
+    }
+
+    const result = await createBookingAction({ ...values, price: selectedEvent.priceFrom });
     const booking = result.data;
 
     if (!result.ok || !booking) {
@@ -76,6 +79,10 @@ export default function BookingPage() {
 
   if (loading) {
     return <main className="mx-auto min-h-screen max-w-6xl px-6 py-10"><p className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">Loading booking flow...</p></main>;
+  }
+
+  if (!selectedEvent) {
+    return <main className="mx-auto min-h-screen max-w-6xl px-6 py-10"><p className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">No tournaments are available from the API yet.</p></main>;
   }
 
   return (

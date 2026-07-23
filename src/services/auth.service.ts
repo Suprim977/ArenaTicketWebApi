@@ -19,12 +19,39 @@ const request = async <T>(operation: () => Promise<ApiResponse<T>>): Promise<Act
   }
 };
 
+type BackendAuthResponse = {
+  user: { _id: string; email: string; name: string; role: "USER" | "ADMIN" };
+  tokens: { accessToken: string };
+};
+
+const normalizeAuthResponse = (data: BackendAuthResponse): AuthResponse => {
+  const [firstName = "", ...lastName] = data.user.name.trim().split(/\s+/);
+  return {
+    token: data.tokens.accessToken,
+    user: {
+      _id: data.user._id,
+      email: data.user.email,
+      role: data.user.role.toLowerCase() as AuthUser["role"],
+      person: { firstName, lastName: lastName.join(" ") },
+    },
+  };
+};
+
+const authRequest = async (operation: () => Promise<ApiResponse<BackendAuthResponse>>): Promise<ActionResult<AuthResponse>> => {
+  const result = await request(operation);
+  return result.data ? { ok: true, message: result.message, data: normalizeAuthResponse(result.data) } : { ok: false, message: result.message };
+};
+
 export const authService = {
-  login: (payload: AuthPayload) => request<AuthResponse>(() => axiosInstance.post(API_ENDPOINTS.auth.login, payload)),
-  register: (payload: RegisterPayload) => request<AuthResponse>(() => axiosInstance.post(API_ENDPOINTS.auth.register, payload)),
+  login: (payload: AuthPayload) => authRequest(() => axiosInstance.post(API_ENDPOINTS.auth.login, payload)),
+  register: (payload: RegisterPayload) => authRequest(() => axiosInstance.post(API_ENDPOINTS.auth.register, {
+    name: `${payload.firstName} ${payload.lastName}`.trim(),
+    email: payload.email,
+    password: payload.password,
+  })),
   forgotPassword: (payload: ForgotPasswordPayload) => request<null>(() => axiosInstance.post(API_ENDPOINTS.auth.forgotPassword, payload)),
   resetPassword: (payload: ResetPasswordPayload) => request<null>(() => axiosInstance.post(API_ENDPOINTS.auth.resetPassword, payload)),
   whoAmI: (token?: string) => request<AuthUser>(() => axiosInstance.get(API_ENDPOINTS.auth.whoami, { headers: authorization(token) })),
-  updateProfile: (payload: FormData, token?: string) => request<AuthUser>(() => axiosInstance.put(API_ENDPOINTS.auth.update, payload, { headers: authorization(token) })),
-  updatePassword: (payload: UpdatePasswordPayload, token?: string) => request<null>(() => axiosInstance.put(API_ENDPOINTS.auth.password, payload, { headers: authorization(token) })),
+  updateProfile: (payload: FormData, token?: string) => request<AuthUser>(() => axiosInstance.patch(API_ENDPOINTS.auth.update, payload, { headers: authorization(token) })),
+  updatePassword: (payload: UpdatePasswordPayload, token?: string) => request<null>(() => axiosInstance.patch(API_ENDPOINTS.auth.password, payload, { headers: authorization(token) })),
 };

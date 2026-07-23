@@ -17,4 +17,5 @@ export const createBookingAction = async (payload: {
   quantity: number;
   attendeeName: string;
   attendeeEmail: string;
+  price: number;
 }) => arenaService.createBooking(payload, await getAuthToken());
