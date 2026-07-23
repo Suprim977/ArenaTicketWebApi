@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const authPages = ["/login", "/register", "/forgot-password", "/reset-password"];
-const protectedPaths = ["/admin", "/dashboard"];
+const protectedPaths = ["/admin", "/dashboard", "/events", "/booking", "/ticket"];
 
 export const authRedirectMiddleware = (request: NextRequest): NextResponse => {
   const token = request.cookies.get("token")?.value;

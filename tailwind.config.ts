@@ -15,7 +15,9 @@ const config: Config = {
     extend: {
       colors: {
         arena: {
-          indigo: "#6366F1",
+          indigo: "#2563EB",
+          purple: "#7C3AED",
+          success: "#10B981",
           slate: "#0F172A",
           fog: "#F3F4F6",
         },

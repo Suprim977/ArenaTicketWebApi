@@ -1,5 +1,5 @@
 import { AxiosError } from "axios";
-import { axiosInstance } from "@/lib/api/axios-instance";
+import { axiosInstance, type ApiResponse } from "@/lib/api/axios-instance";
 import { API_ENDPOINTS } from "@/lib/api/endpoints";
 import type { ArenaEvent, ArenaResult, Booking, EventCategorySummary } from "@/types/arena";
 
@@ -10,7 +10,7 @@ const messageFor = (error: unknown) =>
     ? error.response.data.message
     : "Request failed";
 
-const request = async <T>(operation: () => Promise<{ data: { message?: string; data?: T } }>): Promise<ArenaResult<T>> => {
+const request = async <T>(operation: () => Promise<ApiResponse<T>>): Promise<ArenaResult<T>> => {
   try {
     const response = await operation();
     return { ok: true, message: response.data.message ?? "Request completed", data: response.data.data };

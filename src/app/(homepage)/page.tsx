@@ -1,42 +1,24 @@
 import Link from "next/link";
+import { ArrowRight, CheckCircle2, CreditCard, Gamepad2, QrCode, Search, ShieldCheck, Smartphone, Star, Ticket, Trophy } from "lucide-react";
 import Footer from "../__components/Footer";
 import Navbar from "../__components/Navbar";
+import EventAccessLink from "./EventAccessLink";
+
+const features = [
+  [Gamepad2, "Live Events", "Watch your favorite teams compete"], [Ticket, "Instant Tickets", "QR code delivery to your phone"], [Trophy, "VIP Experiences", "Meet & greet with pro players"],
+  [CreditCard, "Secure Payment", "Encrypted transactions"], [Smartphone, "Mobile Entry", "No printing needed"], [ShieldCheck, "Easy Refunds", "Full refund up to 24h before"],
+] as const;
 
 export default function HomePage() {
-  return (
-    <main className="min-h-screen bg-white">
-      <Navbar />
-      <section className="mx-auto grid max-w-6xl gap-10 px-6 py-16 md:grid-cols-2 md:py-24">
-        <div className="space-y-6">
-          <p className="label-mini">ArenaTicket Platform</p>
-          <h1 className="max-w-xl text-4xl font-black leading-tight text-slate-900 md:text-6xl">
-            Book your seat for the biggest esports moments.
-          </h1>
-          <p className="max-w-md text-slate-600">
-            Discover live events, secure your ticket, and manage your ArenaTicket account from one focused frontend.
-          </p>
-          <div className="flex gap-3">
-            <Link href="/events" className="primary-btn">
-              Explore Events
-            </Link>
-            <Link href="/register" className="rounded-xl border border-slate-200 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-200 hover:text-arena-indigo">
-              Create Account
-            </Link>
-          </div>
-        </div>
-        <div className="rounded-[2rem] border border-blue-100 bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(239,246,255,0.95))] p-8 shadow-card">
-          <h2 className="text-xl font-bold text-slate-900">Live Arena Control</h2>
-          <p className="mt-3 text-sm text-slate-600">
-            Browse events, reserve seats, scan QR tickets, and manage admin operations with role-based access.
-          </p>
-          <div className="mt-8 grid gap-4 text-sm">
-            <div className="rounded-xl bg-white p-4 shadow-sm">Auth, registration, and password recovery</div>
-            <div className="rounded-xl bg-white p-4 shadow-sm">Event discovery, booking, and QR tickets</div>
-            <div className="rounded-xl bg-white p-4 shadow-sm">Admin dashboards for users, bookings, and payments</div>
-          </div>
-        </div>
-      </section>
-      <Footer />
-    </main>
-  );
+  return <main className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-900"><Navbar />
+    <section className="relative isolate overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-violet-950 py-20 text-white sm:py-28">
+      <div aria-hidden className="absolute inset-0 opacity-25 [background-image:linear-gradient(rgba(255,255,255,.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.2)_1px,transparent_1px)] [background-size:44px_44px]" />
+      <div className="relative mx-auto max-w-6xl px-6 text-center"><p className="inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-widest text-blue-100">The next level of live gaming</p><h1 className="mx-auto mt-7 max-w-4xl text-5xl font-black tracking-tight sm:text-7xl">Experience Esports <span className="bg-gradient-to-r from-blue-300 to-violet-300 bg-clip-text text-transparent">Like Never Before</span></h1><p className="mx-auto mt-6 max-w-2xl text-lg text-slate-300 sm:text-xl">Secure your seat at the world&apos;s biggest gaming tournaments</p><div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row"><EventAccessLink className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3.5 font-bold text-slate-950 shadow-lg transition hover:scale-105"><span>Browse Events</span><ArrowRight size={18}/></EventAccessLink><a href="#how-it-works" className="rounded-xl border border-white/20 bg-white/10 px-6 py-3.5 font-bold backdrop-blur transition hover:scale-105">How It Works</a></div></div>
+      <div className="relative mx-auto -mb-12 mt-14 grid max-w-4xl grid-cols-1 divide-y divide-white/10 overflow-hidden rounded-2xl border border-white/15 bg-slate-950/40 text-center backdrop-blur md:grid-cols-3 md:divide-x md:divide-y-0">{["50+ Events", "10K+ Tickets Sold", "4.9★ Rating"].map((item) => <p key={item} className="py-5 text-lg font-bold">{item}</p>)}</div>
+    </section>
+    <section className="mx-auto max-w-6xl px-6 pb-20 pt-28"><header className="text-center"><p className="label-mini text-blue-600">Built for game day</p><h2 className="mt-3 text-3xl font-black sm:text-4xl">Everything you need to be in the arena</h2></header><div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">{features.map(([Icon, title, copy]) => <article key={title} className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"><Icon className="rounded-xl bg-blue-50 p-3 text-blue-600 group-hover:bg-blue-600 group-hover:text-white" size={48}/><h3 className="mt-5 text-lg font-bold">{title}</h3><p className="mt-2 text-sm text-slate-600">{copy}</p></article>)}</div></section>
+    <section id="how-it-works" className="mx-auto max-w-6xl px-6 py-20 text-center"><p className="label-mini text-blue-600">Simple by design</p><h2 className="mt-3 text-3xl font-black sm:text-4xl">From hype to your seat in three steps</h2><div className="mt-12 grid gap-8 md:grid-cols-3">{[[Search,"Browse Events","Find your perfect match"],[Ticket,"Choose Seats","Pick your preferred tier"],[CheckCircle2,"Get Tickets","Instant QR code delivery"]].map(([Icon, title, copy], index) => { const StepIcon = Icon as typeof Search; return <div key={title as string}><span className="inline-flex size-14 items-center justify-center rounded-full bg-blue-600 text-lg font-black text-white">{index + 1}</span><StepIcon className="mx-auto mt-5 text-violet-600" size={28}/><h3 className="mt-3 font-bold">{title as string}</h3><p className="mt-2 text-sm text-slate-600">{copy as string}</p></div>})}</div></section>
+    <section className="bg-slate-950 py-20 text-white"><div className="mx-auto max-w-6xl px-6"><header className="text-center"><p className="label-mini text-blue-300">Fan approved</p><h2 className="mt-3 text-3xl font-black sm:text-4xl">Real fans. Unforgettable nights.</h2></header><div className="mt-12 grid gap-5 md:grid-cols-3">{["The QR entry was flawless. I was in my seat before the opening match.", "ArenaTicket made getting VIP access to my first major feel effortless.", "Great events, clear pricing, and the whole night felt brilliantly organised."].map((quote, index) => <figure key={quote} className="rounded-2xl border border-white/10 bg-white/5 p-6"><div className="flex text-amber-400">{Array.from({length:5},(_, i)=><Star key={i} size={16} fill="currentColor"/>)}</div><blockquote className="mt-5 text-sm leading-7 text-slate-200">“{quote}”</blockquote><figcaption className="mt-5 font-bold">{["Maya Chen", "Jordan Davis", "Amara Okafor"][index]}</figcaption></figure>)}</div></div></section>
+    <section className="px-6 py-20"><div className="mx-auto max-w-6xl rounded-3xl bg-gradient-to-r from-blue-700 to-violet-700 px-6 py-16 text-center text-white"><QrCode className="mx-auto text-blue-200" size={34}/><h2 className="mt-5 text-3xl font-black sm:text-5xl">Ready to Join the Arena?</h2><Link href="/register" className="mt-8 inline-flex rounded-xl bg-white px-6 py-3.5 font-bold text-blue-700 shadow-lg transition hover:scale-105">Create Free Account</Link><p className="mt-4 text-sm text-blue-100">No credit card required</p></div></section><Footer />
+  </main>;
 }
