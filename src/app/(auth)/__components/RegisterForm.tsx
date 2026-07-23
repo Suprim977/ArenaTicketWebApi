@@ -7,7 +7,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerAction } from "@/lib/actions/auth-action";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { setAuthCookies } from "@/lib/cookies";
 import { RegisterSchemaType, registerSchema } from "./schema";
 
 export default function RegisterForm() {
@@ -24,25 +23,25 @@ export default function RegisterForm() {
   const onSubmit = async (values: RegisterSchemaType) => {
     setApiError("");
 
-    const [firstName, ...restName] = values.fullName.trim().split(" ");
-    const result = await registerAction({
-      firstName,
-      lastName: restName.join(" ") || "Player",
-      email: values.email,
-      password: values.password,
-      arenaTag: values.fullName.replace(/\s+/g, "_"),
-    });
+    try {
+      const result = await registerAction({
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        password: values.password,
+      });
 
-    if (!result.ok || !result.data?.token) {
-      setApiError(result.message);
-      return;
+      if (!result.ok || !result.data?.token) {
+        setApiError(result.message || "Registration failed. Please try again.");
+        return;
+      }
+
+      login(result.data.token, result.data.user);
+      router.replace("/dashboard");
+    } catch (error) {
+      console.error("[RegisterForm] Registration failed", error);
+      setApiError("Unable to create your account right now. Please try again.");
     }
-
-    localStorage.setItem("token", result.data.token);
-    localStorage.setItem("user", JSON.stringify(result.data.user));
-    setAuthCookies(result.data.token, result.data.user?.role);
-    login(result.data.token, result.data.user);
-    router.push("/dashboard");
   };
 
   return (
@@ -54,9 +53,15 @@ export default function RegisterForm() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label className="label-mini">Full Name</label>
-          <input className="input-shell mt-1" placeholder="Jordan Fan" {...register("fullName")} />
-          {errors.fullName && <p className="mt-1 text-xs text-red-500">{errors.fullName.message}</p>}
+          <label className="label-mini" htmlFor="firstName">First Name</label>
+          <input id="firstName" autoComplete="given-name" className="input-shell mt-1" placeholder="Jordan" {...register("firstName")} />
+          {errors.firstName && <p className="mt-1 text-xs text-red-500">{errors.firstName.message}</p>}
+        </div>
+
+        <div>
+          <label className="label-mini" htmlFor="lastName">Last Name</label>
+          <input id="lastName" autoComplete="family-name" className="input-shell mt-1" placeholder="Fan" {...register("lastName")} />
+          {errors.lastName && <p className="mt-1 text-xs text-red-500">{errors.lastName.message}</p>}
         </div>
 
         <div>
@@ -77,7 +82,7 @@ export default function RegisterForm() {
           {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword.message}</p>}
         </div>
 
-        {apiError && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{apiError}</p>}
+        {apiError && <p role="alert" aria-live="polite" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-950/40 dark:text-red-300">{apiError}</p>}
 
         <button type="submit" disabled={isSubmitting} className="primary-btn w-full">
           {isSubmitting ? "Creating Profile..." : "Sign Up"}

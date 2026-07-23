@@ -1,74 +1,32 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { toast } from "sonner";
-import { updatePasswordAction } from "@/lib/actions/auth-action";
+import { dashboardApi } from "@/lib/api/dashboard-api";
 
-const passwordSchema = z
-  .object({
-    currentPassword: z.string().min(6, "Current password must be at least 6 characters"),
-    newPassword: z.string().min(6, "New password must be at least 6 characters"),
-    confirmPassword: z.string().min(6, "Confirm password must be at least 6 characters"),
-  })
-  .refine((values) => values.newPassword === values.confirmPassword, {
-    path: ["confirmPassword"],
-    message: "Passwords do not match",
-  });
-
-type PasswordFormValues = z.infer<typeof passwordSchema>;
+type PasswordForm = { currentPassword: string; newPassword: string; confirmPassword: string };
 
 export default function PasswordPage() {
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm<PasswordFormValues>({
-    resolver: zodResolver(passwordSchema),
+  const { register, handleSubmit, reset, setError, formState: { errors } } = useForm<PasswordForm>();
+  const update = useMutation({
+    mutationFn: ({ currentPassword, newPassword }: PasswordForm) => dashboardApi.updatePassword({ currentPassword, newPassword }),
+    onSuccess: () => { toast.success("Password changed successfully."); reset(); },
+    onError: () => toast.error("Password could not be changed. Check your current password."),
   });
-
-  const onSubmit = async (values: PasswordFormValues) => {
-    const result = await updatePasswordAction({
-      currentPassword: values.currentPassword,
-      newPassword: values.newPassword,
-    });
-
-    if (!result.ok) {
-      toast.error(result.message);
-      return;
-    }
-
-    toast.success("Password changed successfully");
-    reset();
+  const submit = (values: PasswordForm) => {
+    if (values.newPassword !== values.confirmPassword) return setError("confirmPassword", { message: "Passwords do not match" });
+    update.mutate(values);
   };
 
   return (
-    <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 className="text-2xl font-bold text-gray-900">Change Password</h2>
-      <form className="mt-6 space-y-4" onSubmit={handleSubmit(onSubmit)}>
-        <div>
-          <label className="label-mini">Current Password</label>
-          <input className="input-shell mt-1" type="password" {...register("currentPassword")} />
-          {errors.currentPassword && <p className="mt-1 text-xs text-red-500">{errors.currentPassword.message}</p>}
-        </div>
-
-        <div>
-          <label className="label-mini">New Password</label>
-          <input className="input-shell mt-1" type="password" {...register("newPassword")} />
-          {errors.newPassword && <p className="mt-1 text-xs text-red-500">{errors.newPassword.message}</p>}
-        </div>
-
-        <div>
-          <label className="label-mini">Confirm Password</label>
-          <input className="input-shell mt-1" type="password" {...register("confirmPassword")} />
-          {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword.message}</p>}
-        </div>
-
-        <button className="primary-btn" disabled={isSubmitting}>
-          {isSubmitting ? "Updating..." : "Update Password"}
-        </button>
+    <section className="mx-auto max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+      <p className="text-sm font-bold uppercase tracking-widest text-indigo-600">Security</p><h1 className="mt-2 text-3xl font-black">Change password</h1>
+      <form className="mt-7 space-y-4" onSubmit={handleSubmit(submit)}>
+        {([["currentPassword", "Current password"], ["newPassword", "New password"], ["confirmPassword", "Confirm password"]] as const).map(([name, label]) => (
+          <label key={name} className="block text-sm font-semibold">{label}<input className="input-shell mt-2" type="password" {...register(name, { required: `${label} is required`, minLength: { value: 8, message: "Use at least 8 characters" } })} />{errors[name] && <span className="text-xs text-rose-600">{errors[name]?.message}</span>}</label>
+        ))}
+        <button className="primary-btn" disabled={update.isPending}>{update.isPending ? "Updating…" : "Update password"}</button>
       </form>
     </section>
   );

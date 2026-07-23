@@ -1,116 +1,41 @@
 "use client";
 
-import Image from "next/image";
-import { ChangeEvent, useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { updateProfileAction, whoAmIAction } from "@/lib/actions/auth-action";
-import { useAuth } from "@/lib/contexts/AuthContext";
-
-type ProfileForm = {
-  firstName: string;
-  lastName: string;
-  arenaTag: string;
-};
+import DashboardSkeleton from "@/components/DashboardSkeleton";
+import { dashboardApi } from "@/lib/api/dashboard-api";
+import type { UpdateUserPayload } from "@/types/user";
 
 export default function ProfilePage() {
-  const { setUser } = useAuth();
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { isSubmitting },
-  } = useForm<ProfileForm>();
-
+  const queryClient = useQueryClient();
+  const profile = useQuery({ queryKey: ["current-user"], queryFn: dashboardApi.getMe });
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<UpdateUserPayload>();
   useEffect(() => {
-    const loadProfile = async () => {
-      const result = await whoAmIAction();
-      if (result.ok && result.data) {
-        reset({
-          firstName: result.data.person?.firstName || "",
-          lastName: result.data.person?.lastName || "",
-          arenaTag: result.data.person?.arenaTag || "",
-        });
-        if (result.data.person?.avatar) {
-          setAvatarPreview(`http://localhost:8089${result.data.person.avatar}`);
-        }
-      }
-    };
-
-    void loadProfile();
-  }, [reset]);
-
-  const handleAvatarChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setAvatarFile(file);
-    setAvatarPreview(URL.createObjectURL(file));
-  };
-
-  const onSubmit = async (values: ProfileForm) => {
-    const formData = new FormData();
-    formData.append("firstName", values.firstName);
-    formData.append("lastName", values.lastName);
-    formData.append("arenaTag", values.arenaTag);
-
-    if (avatarFile) {
-      formData.append("avatar", avatarFile);
-    }
-
-    const result = await updateProfileAction(formData);
-
-    if (!result.ok) {
-      toast.error(result.message);
-      return;
-    }
-
-    const updatedUser = result.data ?? null;
-    setUser(updatedUser);
-    localStorage.setItem("user", JSON.stringify(updatedUser));
-    toast.success("Profile updated successfully");
-  };
+    if (profile.data) reset({ firstName: profile.data.firstName ?? "", lastName: profile.data.lastName ?? "", email: profile.data.email });
+  }, [profile.data, reset]);
+  const update = useMutation({
+    mutationFn: dashboardApi.updateMe,
+    onSuccess: (user) => {
+      queryClient.setQueryData(["current-user"], user);
+      toast.success("Profile updated successfully.");
+    },
+    onError: () => toast.error("Your profile could not be updated."),
+  });
+  if (profile.isLoading) return <DashboardSkeleton cards={1} />;
 
   return (
-    <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 className="text-2xl font-bold text-gray-900">Profile Settings</h2>
-      <form className="mt-6 space-y-4" onSubmit={handleSubmit(onSubmit)}>
-        <div>
-          <label className="label-mini">Avatar</label>
-          <div className="mt-2 flex items-center gap-4">
-            <div className="relative h-16 w-16 overflow-hidden rounded-full bg-gray-100">
-              {avatarPreview ? (
-                <Image src={avatarPreview} alt="Avatar preview" fill className="object-cover" />
-              ) : (
-                <div className="flex h-full items-center justify-center text-xs text-gray-400">No image</div>
-              )}
-            </div>
-            <input type="file" accept="image/*" onChange={handleAvatarChange} />
-          </div>
+    <section className="mx-auto max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+      <p className="text-sm font-bold uppercase tracking-widest text-indigo-600">Profile</p>
+      <h1 className="mt-2 text-3xl font-black">Personal details</h1>
+      <form className="mt-7 space-y-4" onSubmit={handleSubmit((values) => update.mutate(values))}>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="text-sm font-semibold">First name<input className="input-shell mt-2" {...register("firstName", { required: "First name is required" })} />{errors.firstName && <span className="text-xs text-rose-600">{errors.firstName.message}</span>}</label>
+          <label className="text-sm font-semibold">Last name<input className="input-shell mt-2" {...register("lastName", { required: "Last name is required" })} />{errors.lastName && <span className="text-xs text-rose-600">{errors.lastName.message}</span>}</label>
         </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
-            <label className="label-mini">First Name</label>
-            <input className="input-shell mt-1" {...register("firstName")} />
-          </div>
-          <div>
-            <label className="label-mini">Last Name</label>
-            <input className="input-shell mt-1" {...register("lastName")} />
-          </div>
-        </div>
-
-        <div>
-          <label className="label-mini">Arena Tag</label>
-          <input className="input-shell mt-1" {...register("arenaTag")} />
-        </div>
-
-        <button className="primary-btn" disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : "Update Profile"}
-        </button>
+        <label className="block text-sm font-semibold">Email<input className="input-shell mt-2" type="email" {...register("email", { required: "Email is required" })} />{errors.email && <span className="text-xs text-rose-600">{errors.email.message}</span>}</label>
+        <button className="primary-btn" disabled={update.isPending}>{update.isPending ? "Saving…" : "Save changes"}</button>
       </form>
     </section>
   );

@@ -7,7 +7,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginAction } from "@/lib/actions/auth-action";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { setAuthCookies } from "@/lib/cookies";
 import { LoginSchemaType, loginSchema } from "./schema";
 
 export default function LoginForm() {
@@ -23,19 +22,20 @@ export default function LoginForm() {
 
   const onSubmit = async (values: LoginSchemaType) => {
     setApiError("");
-    const result = await loginAction(values);
+    try {
+      const result = await loginAction(values);
 
+      if (!result.ok || !result.data?.token) {
+        setApiError(result.message || "Login failed. Please try again.");
+        return;
+      }
 
-    if (!result.ok || !result.data?.token) {
-      setApiError(result.message);
-      return;
+      login(result.data.token, result.data.user);
+      router.replace("/dashboard");
+    } catch (error) {
+      console.error("[LoginForm] Login failed", error);
+      setApiError("Unable to sign in right now. Please try again.");
     }
-
-    localStorage.setItem("token", result.data.token);
-    localStorage.setItem("user", JSON.stringify(result.data.user));
-    setAuthCookies(result.data.token, result.data.user?.role);
-    login(result.data.token, result.data.user);
-    router.push("/dashboard");
   };
 
   return (
@@ -62,7 +62,7 @@ export default function LoginForm() {
           {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>}
         </div>
 
-        {apiError && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{apiError}</p>}
+        {apiError && <p role="alert" aria-live="polite" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-950/40 dark:text-red-300">{apiError}</p>}
 
         <button type="submit" disabled={isSubmitting} className="primary-btn w-full">
           {isSubmitting ? "Signing you in..." : "Sign In"}

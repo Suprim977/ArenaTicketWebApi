@@ -1,6 +1,8 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { dashboardApi } from "@/lib/api/dashboard-api";
 import { deleteAuthCookies, setAuthCookies } from "@/lib/cookies";
 import type { AuthUser } from "@/types/auth";
 
@@ -11,6 +13,7 @@ type AuthContextValue = {
   login: (token: string, user: AuthUser) => void;
   logout: () => void;
   setUser: (user: AuthUser | null) => void;
+  isLoading: boolean;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -32,10 +35,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return null;
     }
   });
+  const profileQuery = useQuery({
+    queryKey: ["current-user"],
+    queryFn: dashboardApi.getMe,
+    enabled: Boolean(token),
+    retry: false,
+  });
+
+  const effectiveUser = (profileQuery.data as AuthUser | undefined) ?? user;
 
   useEffect(() => {
-    if (token) setAuthCookies(token, user?.role);
-  }, [token, user?.role]);
+    if (profileQuery.data) localStorage.setItem("user", JSON.stringify(profileQuery.data));
+  }, [profileQuery.data]);
+
+  useEffect(() => {
+    if (token) setAuthCookies(token, effectiveUser?.role);
+  }, [effectiveUser?.role, token]);
 
   const login = (newToken: string, newUser: AuthUser) => {
     setToken(newToken);
@@ -56,13 +71,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const value = useMemo(
     () => ({
       token,
-      user,
+      user: effectiveUser,
       isAuthenticated: Boolean(token),
+      isLoading: Boolean(token) && profileQuery.isLoading,
       login,
       logout,
       setUser,
     }),
-    [token, user],
+    [effectiveUser, profileQuery.isLoading, token],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

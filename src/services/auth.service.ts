@@ -5,10 +5,13 @@ import type { ActionResult, AuthPayload, AuthResponse, AuthUser, ForgotPasswordP
 
 const authorization = (token?: string) => (token ? { Authorization: `Bearer ${token}` } : undefined);
 
-const messageFor = (error: unknown) =>
-  error instanceof AxiosError && typeof error.response?.data?.message === "string"
-    ? error.response.data.message
-    : "Request failed";
+const messageFor = (error: unknown) => {
+  if (!(error instanceof AxiosError)) return "Request failed";
+  if (typeof error.response?.data?.message === "string") return error.response.data.message;
+  if (error.response?.data?.errors) return Object.values(error.response.data.errors).flat().join(" ");
+  if (error.code === "ECONNREFUSED" || error.code === "ERR_NETWORK") return "Cannot reach the ArenaTicket server. Please try again shortly.";
+  return "Request failed";
+};
 
 const request = async <T>(operation: () => Promise<ApiResponse<T>>): Promise<ActionResult<T>> => {
   try {
@@ -45,8 +48,8 @@ const authRequest = async (operation: () => Promise<ApiResponse<BackendAuthRespo
 export const authService = {
   login: (payload: AuthPayload) => authRequest(() => axiosInstance.post(API_ENDPOINTS.auth.login, payload)),
   register: (payload: RegisterPayload) => authRequest(() => axiosInstance.post(API_ENDPOINTS.auth.register, {
-    name: `${payload.firstName} ${payload.lastName}`.trim(),
-    email: payload.email,
+    name: `${payload.firstName.trim()} ${payload.lastName.trim()}`,
+    email: payload.email.trim().toLowerCase(),
     password: payload.password,
   })),
   forgotPassword: (payload: ForgotPasswordPayload) => request<null>(() => axiosInstance.post(API_ENDPOINTS.auth.forgotPassword, payload)),
