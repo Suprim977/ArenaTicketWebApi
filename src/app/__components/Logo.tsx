@@ -7,8 +7,8 @@ export default function Logo() {
         <Ticket className="h-5 w-5" />
       </div>
       <div>
-        <p className="text-lg font-extrabold text-gray-900">ArenaTicket</p>
-        <p className="text-xs tracking-[0.14em] text-gray-500">ESPORTS TICKETING</p>
+        <p className="text-lg font-extrabold text-gray-900 dark:text-white">ArenaTicket</p>
+        <p className="text-xs tracking-[0.14em] text-gray-500 dark:text-slate-400">ESPORTS TICKETING</p>
       </div>
     </div>
   );
