@@ -1,6 +1,7 @@
 import { AxiosError } from "axios";
 import { axiosInstance } from "../../api/axios-instance";
 import { API_ENDPOINTS } from "../../api/endpoints";
+import type { AuthRole } from "@/types/auth";
 
 type ActionResult<T> = {
   ok: boolean;
@@ -14,6 +15,25 @@ type ActionResult<T> = {
   };
 };
 
+export type AdminUser = {
+  _id: string;
+  email: string;
+  role: AuthRole;
+  createdAt?: string;
+  person?: {
+    firstName?: string;
+    lastName?: string;
+  };
+};
+
+export type AdminUserPayload = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password?: string;
+  role: AuthRole;
+};
+
 const parseError = (error: unknown): string => {
   if (error instanceof AxiosError) {
     return error.response?.data?.message || "Request failed";
@@ -22,7 +42,7 @@ const parseError = (error: unknown): string => {
   return "Unexpected error";
 };
 
-export const getUsersAction = async (params: { page: number; limit: number }): Promise<ActionResult<any[]>> => {
+export const getUsersAction = async (params: { page: number; limit: number }): Promise<ActionResult<AdminUser[]>> => {
   try {
     const response = await axiosInstance.get(API_ENDPOINTS.adminUsers.list, { params });
     return {
@@ -36,7 +56,7 @@ export const getUsersAction = async (params: { page: number; limit: number }): P
   }
 };
 
-export const getUserByIdAction = async (id: string): Promise<ActionResult<any>> => {
+export const getUserByIdAction = async (id: string): Promise<ActionResult<AdminUser>> => {
   try {
     const response = await axiosInstance.get(API_ENDPOINTS.adminUsers.byId(id));
     return { ok: true, message: response.data?.message || "User fetched", data: response.data?.data };
@@ -45,7 +65,7 @@ export const getUserByIdAction = async (id: string): Promise<ActionResult<any>> 
   }
 };
 
-export const createUserAction = async (payload: any): Promise<ActionResult<any>> => {
+export const createUserAction = async (payload: AdminUserPayload): Promise<ActionResult<AdminUser>> => {
   try {
     const response = await axiosInstance.post(API_ENDPOINTS.adminUsers.list, payload);
     return { ok: true, message: response.data?.message || "User created", data: response.data?.data };
@@ -54,7 +74,7 @@ export const createUserAction = async (payload: any): Promise<ActionResult<any>>
   }
 };
 
-export const updateUserAction = async (id: string, payload: any): Promise<ActionResult<any>> => {
+export const updateUserAction = async (id: string, payload: AdminUserPayload): Promise<ActionResult<AdminUser>> => {
   try {
     const response = await axiosInstance.put(API_ENDPOINTS.adminUsers.byId(id), payload);
     return { ok: true, message: response.data?.message || "User updated", data: response.data?.data };

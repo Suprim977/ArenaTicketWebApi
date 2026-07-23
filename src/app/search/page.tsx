@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { Suspense, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import SectionHeader from "@/components/SectionHeader";
 import EventCard from "@/components/EventCard";
@@ -9,6 +9,14 @@ import { mockCategories, mockEvents } from "@/lib/mock/arena-data";
 import { useEventFiltersStore } from "@/store/useEventFiltersStore";
 
 export default function SearchPage() {
+  return (
+    <Suspense fallback={<main className="mx-auto min-h-screen max-w-6xl px-6 py-10" />}>
+      <SearchContent />
+    </Suspense>
+  );
+}
+
+function SearchContent() {
   const searchParams = useSearchParams();
   const query = useEventFiltersStore((state) => state.query);
   const category = useEventFiltersStore((state) => state.category);

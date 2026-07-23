@@ -2,21 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import UserForm from "@/app/admin/_components/UserForm";
-import { getUserByIdAction, updateUserAction } from "@/lib/actions/admin/user-action";
+import UserForm from "@/app/admin/__components/UserForm";
+import { getUserByIdAction, type AdminUser, updateUserAction } from "@/lib/actions/admin/user-action";
 
 export default function EditUserPage() {
   const params = useParams<{ id: string }>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<AdminUser | null>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
       setLoading(true);
       const result = await getUserByIdAction(params.id);
 
-      if (!result.ok) {
+      if (!result.ok || !result.data) {
         setError(result.message);
         setLoading(false);
         return;
@@ -30,7 +30,7 @@ export default function EditUserPage() {
   }, [params.id]);
 
   if (loading) return <p className="rounded-xl bg-white p-4 text-sm text-gray-600">Loading user...</p>;
-  if (error) return <p className="rounded-xl bg-red-50 p-4 text-sm text-red-600">{error}</p>;
+  if (error || !user) return <p className="rounded-xl bg-red-50 p-4 text-sm text-red-600">{error || "User not found."}</p>;
 
   return (
     <section className="space-y-4">

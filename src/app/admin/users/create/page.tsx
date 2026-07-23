@@ -1,6 +1,6 @@
 "use client";
 
-import UserForm from "@/app/admin/_components/UserForm";
+import UserForm from "@/app/admin/__components/UserForm";
 import { createUserAction } from "@/lib/actions/admin/user-action";
 
 export default function CreateUserPage() {

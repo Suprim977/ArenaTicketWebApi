@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { deleteUserAction, getUsersAction } from "@/lib/actions/admin/user-action";
-import DeleteModal from "../_components/DeleteModal";
-import UserTable from "../_components/UserTable";
+import DeleteModal from "../__components/DeleteModal";
+import UserTable from "../__components/UserTable";
 
 type UserData = {
   _id: string;
@@ -28,7 +28,7 @@ export default function AdminUsersPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     setError("");
     const result = await getUsersAction({ page, limit });
@@ -43,11 +43,12 @@ export default function AdminUsersPage() {
     setUsers(result.data || []);
     setMeta(result.meta || { page: 1, limit, total: 0, totalPages: 1 });
     setLoading(false);
-  };
+  }, [page, limit]);
 
   useEffect(() => {
-    void fetchUsers();
-  }, [page]);
+    const timer = window.setTimeout(() => void fetchUsers(), 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchUsers]);
 
   const filteredUsers = useMemo(() => {
     if (!query) return users;

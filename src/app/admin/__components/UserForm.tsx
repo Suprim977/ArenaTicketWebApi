@@ -16,10 +16,12 @@ const userSchema = z.object({
 
 type UserFormSchema = z.infer<typeof userSchema>;
 
+export type UserFormPayload = UserFormSchema;
+
 type UserFormProps = {
   defaultValues?: Partial<UserFormSchema>;
   submitLabel?: string;
-  onSubmitAction: (payload: any) => Promise<{ ok: boolean; message: string }>;
+  onSubmitAction: (payload: UserFormPayload) => Promise<{ ok: boolean; message: string }>;
 };
 
 export default function UserForm({ defaultValues, submitLabel = "Save User", onSubmitAction }: UserFormProps) {

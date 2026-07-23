@@ -3,12 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import SectionHeader from "@/components/SectionHeader";
 import BookingSummary from "@/components/BookingSummary";
 import { createBookingAction, getEventsAction } from "@/lib/actions/arena-action";
 import { mockEvents } from "@/lib/mock/arena-data";
-import { bookingSchema, type BookingSchemaType } from "@/lib/schemas/booking-schema";
+import { bookingSchema, type BookingSchemaInput, type BookingSchemaType } from "@/lib/schemas/booking-schema";
 import type { ArenaEvent } from "@/types/arena";
 
 export default function BookingPage() {
@@ -21,10 +21,10 @@ export default function BookingPage() {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     setValue,
     formState: { errors },
-  } = useForm<BookingSchemaType>({
+  } = useForm<BookingSchemaInput, unknown, BookingSchemaType>({
     resolver: zodResolver(bookingSchema),
     defaultValues: {
       eventId: mockEvents[0].id,
@@ -35,9 +35,9 @@ export default function BookingPage() {
     },
   });
 
-  const eventId = watch("eventId");
-  const seatType = watch("seatType");
-  const quantity = watch("quantity");
+  const eventId = useWatch({ control, name: "eventId" });
+  const seatType = useWatch({ control, name: "seatType" });
+  const quantity = useWatch({ control, name: "quantity" });
 
   useEffect(() => {
     const loadEvents = async () => {

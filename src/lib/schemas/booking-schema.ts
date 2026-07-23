@@ -9,3 +9,4 @@ export const bookingSchema = z.object({
 });
 
 export type BookingSchemaType = z.infer<typeof bookingSchema>;
+export type BookingSchemaInput = z.input<typeof bookingSchema>;
