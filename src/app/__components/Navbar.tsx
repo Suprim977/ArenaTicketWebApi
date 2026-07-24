@@ -15,6 +15,7 @@ export default function Navbar() {
   const router = useRouter();
   const { user, isAuthenticated, isLoading, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
   const close = () => setOpen(false);
   const links = isAuthenticated
     ? user?.role === "admin"
@@ -54,7 +55,7 @@ export default function Navbar() {
                 return <Link onClick={close} key={link.href} href={link.href} aria-current={active ? "page" : undefined} className={`rounded-xl px-3 py-2 transition ${active ? "bg-indigo-50 text-indigo-700 dark:bg-slate-800 dark:text-white" : "hover:bg-slate-100 dark:hover:bg-slate-800"}`}>{link.label}</Link>;
               })}
               {isAuthenticated && <button onClick={() => { logout(); router.replace("/login"); }} className="rounded-xl px-3 py-2 hover:bg-rose-50 hover:text-rose-700">Logout</button>}
-              {isAuthenticated && <Link href="/profile" aria-label="Open profile" className="ml-1 flex size-9 items-center justify-center overflow-hidden rounded-full bg-indigo-600 font-bold text-white">{imageUrl ? <Image src={imageUrl} alt="" width={36} height={36} className="size-9 object-cover" /> : initials}</Link>}
+              {isAuthenticated && <Link href="/profile" aria-label="Open profile" className="ml-1 flex size-9 items-center justify-center overflow-hidden rounded-full bg-indigo-600 font-bold text-white">{imageUrl && imageUrl !== failedImageUrl ? <Image unoptimized src={imageUrl} alt="" width={36} height={36} className="size-9 object-cover" onError={() => setFailedImageUrl(imageUrl)} /> : initials}</Link>}
               <ThemeToggle />
             </nav>
             <button className="rounded-lg p-2 md:hidden" aria-label="Toggle navigation" aria-expanded={open} onClick={() => setOpen((value) => !value)}>{open ? <X /> : <Menu />}</button>

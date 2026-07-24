@@ -36,6 +36,7 @@ export default function ProfilePanel() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
   const [photoError, setPhotoError] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
   const profile = useQuery({ queryKey: ["current-user"], queryFn: profileService.getProfile });
@@ -81,7 +82,6 @@ export default function ProfilePanel() {
       syncUser({ ...profile.data, ...user, updatedAt: user.updatedAt ?? String(Date.now()) });
       setPhotoError("");
       setFile(null);
-      setPreviewUrl(null);
       setUploadProgress(0);
       if (inputRef.current) inputRef.current.value = "";
       toast.success("Profile photo uploaded successfully.");
@@ -127,7 +127,9 @@ export default function ProfilePanel() {
     }
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setFile(selected);
-    setPreviewUrl(URL.createObjectURL(selected));
+    const nextPreviewUrl = URL.createObjectURL(selected);
+    setFailedImageUrl(null);
+    setPreviewUrl(nextPreviewUrl);
   };
 
   if (profile.isLoading) return <DashboardSkeleton cards={1} />;
@@ -138,6 +140,7 @@ export default function ProfilePanel() {
   const user = profile.data;
   const currentImage = getProfileImageUrl(user.profilePicture, user.updatedAt);
   const displayImage = previewUrl ?? currentImage;
+  const canDisplayImage = Boolean(displayImage && displayImage !== failedImageUrl);
   const busy = upload.isPending || remove.isPending;
   const details = [
     ["Email", user.email],
@@ -154,7 +157,7 @@ export default function ProfilePanel() {
       <div className="grid gap-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8 md:grid-cols-[15rem_1fr]">
         <div>
           <div className="mx-auto flex size-40 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-slate-400 dark:bg-slate-800">
-            {displayImage ? <Image unoptimized={Boolean(previewUrl)} src={displayImage} alt="Profile preview" width={160} height={160} className="size-40 object-cover" /> : <UserRound size={72} />}
+            {canDisplayImage && displayImage ? <Image unoptimized src={displayImage} alt="Profile picture" width={160} height={160} className="size-40 object-cover" onError={() => setFailedImageUrl(displayImage)} /> : <UserRound size={72} aria-label="Default profile avatar" />}
           </div>
           <input ref={inputRef} className="sr-only" id="profilePicture" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" disabled={busy} onChange={choosePhoto} />
           <div className="mt-4 grid gap-2">

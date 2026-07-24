@@ -20,26 +20,30 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
-  const [token, setToken] = useState<string | null>(() =>
-    typeof window === "undefined" ? null : localStorage.getItem("token"),
-  );
-  const [user, setUser] = useState<AuthUser | null>(() => {
-    if (typeof window === "undefined") return null;
+  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
 
-    const storedUser = localStorage.getItem("user");
-    if (!storedUser) return null;
-
-    try {
-      return JSON.parse(storedUser) as AuthUser;
-    } catch {
-      localStorage.removeItem("user");
-      return null;
-    }
-  });
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const storedToken = localStorage.getItem("token");
+      const storedUser = localStorage.getItem("user");
+      setToken(storedToken);
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser) as AuthUser);
+        } catch {
+          localStorage.removeItem("user");
+        }
+      }
+      setIsHydrated(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
   const profileQuery = useQuery({
     queryKey: ["current-user"],
     queryFn: profileService.getProfile,
-    enabled: Boolean(token),
+    enabled: isHydrated && Boolean(token),
     retry: false,
   });
 
@@ -82,7 +86,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       token,
       user: effectiveUser,
       isAuthenticated: Boolean(token),
-      isLoading: Boolean(token) && profileQuery.isLoading,
+      isLoading: !isHydrated || (Boolean(token) && profileQuery.isLoading),
       login,
       logout,
       setUser: (nextUser: AuthUser | null) => {
