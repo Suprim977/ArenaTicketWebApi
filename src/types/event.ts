@@ -17,6 +17,7 @@ export interface Event {
   description?: string;
   category: EventCategory;
   venue: string;
+  stadium?: string;
   city?: string;
   date: string;
   startTime?: string;
@@ -25,6 +26,7 @@ export interface Event {
   priceFrom?: number;
   seatsLeft?: number;
   tiers?: TicketTier[];
+  active?: boolean;
 }
 
 export interface EventFilters {

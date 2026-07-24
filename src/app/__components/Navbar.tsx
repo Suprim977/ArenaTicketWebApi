@@ -17,13 +17,22 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
   const links = isAuthenticated
-    ? [
-        { href: "/dashboard", label: "Dashboard" },
+    ? user?.role === "admin"
+      ? [
+        { href: "/admin", label: "Admin Dashboard" },
+        { href: "/admin/events", label: "Events Management" },
+        { href: "/admin/bookings", label: "Bookings" },
+        { href: "/admin/users", label: "Users" },
+        { href: "/admin/payments", label: "Payments" },
+        { href: "/profile", label: "Profile" },
+      ]
+      : [
+        { href: "/", label: "Home" },
         { href: "/search", label: "Events" },
+        { href: "/dashboard", label: "Dashboard" },
         { href: "/bookings", label: "My Bookings" },
         { href: "/tickets", label: "My Tickets" },
         { href: "/profile", label: "Profile" },
-        ...(user?.role === "admin" ? [{ href: "/admin", label: "Admin" }] : []),
       ]
     : [
         { href: "/", label: "Home" },

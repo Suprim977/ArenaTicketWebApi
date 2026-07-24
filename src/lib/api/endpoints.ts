@@ -39,6 +39,9 @@ export const API_ENDPOINTS = {
   adminPayments: {
     list: "/admin/payments",
   },
+  adminTickets: {
+    list: "/admin/tickets",
+  },
   profile: {
     get: "/users/profile",
     update: "/users/profile",

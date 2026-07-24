@@ -28,7 +28,7 @@ export default function LoginForm() {
         return;
       }
       login(result.data.token, result.data.user);
-      router.replace("/dashboard");
+      router.replace(result.data.user.role === "admin" ? "/admin" : "/dashboard");
     } catch {
       setApiError("Unable to sign in right now. Please try again.");
     }

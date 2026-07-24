@@ -60,8 +60,7 @@ export default function BookingPage() {
       return;
     }
 
-    const ticketPrice = values.seatType === "VIP" ? 1500 : 600;
-    const result = await createBookingAction({ ...values, price: ticketPrice });
+    const result = await createBookingAction({ ...values, price: selectedEvent.priceFrom });
     const booking = result.data;
 
     if (!result.ok || !booking) {

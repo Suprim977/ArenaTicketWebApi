@@ -40,6 +40,38 @@ type BackendEvent = Event & {
   time?: string;
 };
 
+export type AdminEventPayload = {
+  title: string;
+  description: string;
+  date: string;
+  startTime: string;
+  venue: string;
+  stadium: string;
+  image?: File;
+  normalPrice: number;
+  vipPrice: number;
+  normalAvailability: number;
+  vipAvailability: number;
+  active: boolean;
+};
+
+const eventFormData = (payload: AdminEventPayload) => {
+  const formData = new FormData();
+  formData.append("title", payload.title);
+  formData.append("description", payload.description);
+  formData.append("date", payload.date);
+  formData.append("startTime", payload.startTime);
+  formData.append("venue", payload.venue);
+  formData.append("stadium", payload.stadium);
+  formData.append("active", String(payload.active));
+  formData.append("tiers", JSON.stringify([
+    { name: "Normal", price: payload.normalPrice, available: payload.normalAvailability },
+    { name: "VIP", price: payload.vipPrice, available: payload.vipAvailability },
+  ]));
+  if (payload.image) formData.append("image", payload.image);
+  return formData;
+};
+
 const normalizeEvent = (event: BackendEvent): Event => {
   const eventTime = new Date(event.date).getTime();
   const lowestTierPrice = event.tiers?.length
@@ -81,8 +113,18 @@ export const dashboardApi = {
     unwrapList<User>((await axiosInstance.get(API_ENDPOINTS.adminUsers.list)).data),
   getAdminEvents: async () =>
     unwrapList<BackendEvent>((await axiosInstance.get(API_ENDPOINTS.adminEvents.list)).data).map(normalizeEvent),
+  getAdminEvent: async (id: string) =>
+    normalizeEvent(unwrapItem<BackendEvent>((await axiosInstance.get(API_ENDPOINTS.adminEvents.byId(id))).data)),
+  createAdminEvent: async (payload: AdminEventPayload) =>
+    normalizeEvent(unwrapItem<BackendEvent>((await axiosInstance.post(API_ENDPOINTS.adminEvents.list, eventFormData(payload))).data)),
+  updateAdminEvent: async (id: string, payload: AdminEventPayload) =>
+    normalizeEvent(unwrapItem<BackendEvent>((await axiosInstance.patch(API_ENDPOINTS.adminEvents.byId(id), eventFormData(payload))).data)),
   getAdminBookings: async () =>
     unwrapList<Booking>((await axiosInstance.get(API_ENDPOINTS.adminBookings.list)).data),
+  getAdminPayments: async () =>
+    unwrapList<Payment>((await axiosInstance.get(API_ENDPOINTS.adminPayments.list)).data),
+  getAdminTickets: async () =>
+    unwrapList<Booking>((await axiosInstance.get(API_ENDPOINTS.adminTickets.list)).data),
   deleteAdminUser: async (id: string) => axiosInstance.delete(API_ENDPOINTS.adminUsers.byId(id)),
   deleteAdminEvent: async (id: string) => axiosInstance.delete(API_ENDPOINTS.adminEvents.byId(id)),
 };

@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { CalendarDays, FolderOpen, History, KeyRound, LayoutDashboard, LogOut, Search, Shield, Ticket, UserRound } from "lucide-react";
+import { useEffect } from "react";
+import { CalendarDays, History, KeyRound, LayoutDashboard, LogOut, Ticket, UserRound } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import Logo from "@/app/__components/Logo";
@@ -10,10 +11,8 @@ import Logo from "@/app/__components/Logo";
 const links = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
   { href: "/dashboard/events", label: "Events", icon: CalendarDays },
-  { href: "/dashboard/search", label: "Search", icon: Search },
-  { href: "/dashboard/categories", label: "Categories", icon: FolderOpen },
-  { href: "/dashboard/booking", label: "Booking", icon: Ticket },
-  { href: "/dashboard/history", label: "History", icon: History },
+  { href: "/bookings", label: "My Bookings", icon: History },
+  { href: "/tickets", label: "My Tickets", icon: Ticket },
   { href: "/dashboard/profile", label: "Profile", icon: UserRound },
   { href: "/dashboard/password", label: "Password", icon: KeyRound },
 ] as const;
@@ -21,10 +20,15 @@ const links = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logout } = useAuth();
-  const navLinks = user?.role === "admin"
-    ? [...links, { href: "/dashboard/admin", label: "Admin", icon: Shield }]
-    : links;
+  const { user, isLoading, logout } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && user?.role === "admin") router.replace("/admin");
+  }, [isLoading, router, user?.role]);
+
+  if (!isLoading && user?.role === "admin") {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 lg:grid lg:grid-cols-[17rem_1fr]">
@@ -34,7 +38,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <ThemeToggle />
         </div>
         <nav aria-label="Dashboard navigation" className="flex gap-1 overflow-x-auto px-3 pb-4 lg:block lg:space-y-1 lg:px-4">
-          {navLinks.map(({ href, label, icon: Icon, ...item }) => {
+          {links.map(({ href, label, icon: Icon, ...item }) => {
             const active = "exact" in item ? pathname === href : pathname.startsWith(href);
             return (
               <Link

@@ -24,8 +24,8 @@ export default function SearchPage() {
       </header>
       <label className="relative block">
         <span className="sr-only">Search events</span>
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-        <input value={query} onChange={(event) => setQuery(event.target.value)} className="input-shell pl-12" placeholder="Search by event, venue, or game…" autoFocus />
+        <Search className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-slate-400" size={20} />
+        <input value={query} onChange={(event) => setQuery(event.target.value)} className="input-shell pl-12!" placeholder="Search by event, venue, or game..." autoFocus />
       </label>
       {!deferredQuery && <p className="rounded-2xl border border-dashed border-slate-300 p-10 text-center text-slate-500 dark:border-slate-700">Start typing to search live events.</p>}
       {results.isLoading && <DashboardSkeleton />}

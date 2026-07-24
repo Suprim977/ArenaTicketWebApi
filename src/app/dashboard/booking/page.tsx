@@ -27,7 +27,7 @@ function BookingContent() {
   const [method, setMethod] = useState<PaymentMethod>("esewa");
   const eventQuery = useQuery({ queryKey: ["event", eventId], queryFn: () => dashboardApi.getEvent(eventId), enabled: Boolean(eventId) });
   const event = eventQuery.data;
-  const tiers = useMemo(() => [{ name: "Normal", price: 600 }, { name: "VIP", price: 1500 }], []);
+  const tiers = useMemo(() => event?.tiers ?? [], [event?.tiers]);
   const activeTier = tiers.find((item) => item.name === tier) ?? tiers[0];
   const total = (activeTier?.price ?? 0) * quantity;
 
@@ -57,6 +57,7 @@ function BookingContent() {
   if (!eventId) return <p className="rounded-2xl border border-dashed border-slate-300 p-10 text-center text-slate-500">Select an event from the Events tab to begin booking.</p>;
   if (eventQuery.isLoading) return <DashboardSkeleton />;
   if (!event || eventQuery.isError) return <p className="rounded-xl bg-rose-50 p-5 text-rose-700">The selected event could not be loaded.</p>;
+  if (!tiers.length) return <p className="rounded-xl bg-amber-50 p-5 text-amber-700">Ticket pricing is not configured for this event. Please contact an administrator.</p>;
 
   return (
     <section className="mx-auto max-w-6xl space-y-7">

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import ThemeToggle from "@/components/ThemeToggle";
 import Logo from "@/app/__components/Logo";
@@ -9,17 +10,25 @@ import Logo from "@/app/__components/Logo";
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout } = useAuth();
+  const { user, isLoading, logout } = useAuth();
 
   const navItems = [
     { href: "/admin", label: "Dashboard" },
-    { href: "/admin/users", label: "Users" },
     { href: "/admin/events", label: "Events" },
     { href: "/admin/bookings", label: "Bookings" },
+    { href: "/admin/users", label: "Users" },
     { href: "/admin/payments", label: "Payments" },
-    { href: "/admin/settings", label: "Settings" },
-    { href: "/dashboard", label: "User Dashboard" },
+    { href: "/admin/tickets", label: "Tickets" },
+    { href: "/profile", label: "Profile" },
   ];
+
+  useEffect(() => {
+    if (!isLoading && user?.role !== "admin") router.replace("/dashboard");
+  }, [isLoading, router, user?.role]);
+
+  if (!isLoading && user?.role !== "admin") {
+    return null;
+  }
 
   const handleLogout = () => {
     logout();
@@ -40,7 +49,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               key={item.href}
               href={item.href}
               className={`block rounded-lg px-3 py-2 text-sm font-medium ${
-                pathname.startsWith(item.href) ? "bg-indigo-50 text-arena-indigo dark:bg-slate-800 dark:text-sky-300" : "text-gray-700 dark:text-slate-200"
+                (item.href === "/admin" ? pathname === item.href : pathname.startsWith(item.href)) ? "bg-indigo-50 text-arena-indigo dark:bg-slate-800 dark:text-sky-300" : "text-gray-700 dark:text-slate-200"
               }`}
             >
               {item.label}

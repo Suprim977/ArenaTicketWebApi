@@ -10,7 +10,7 @@ export const authRedirectMiddleware = (request: NextRequest): NextResponse => {
 
   if (authPages.includes(pathname)) {
     if (token) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      return NextResponse.redirect(new URL(role === "admin" ? "/admin" : "/dashboard", request.url));
     }
 
     return NextResponse.next();
@@ -25,6 +25,10 @@ export const authRedirectMiddleware = (request: NextRequest): NextResponse => {
 
   if (pathname.startsWith("/admin") && role !== "admin") {
     return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  if (pathname.startsWith("/dashboard") && role === "admin") {
+    return NextResponse.redirect(new URL("/admin", request.url));
   }
 
   return NextResponse.next();

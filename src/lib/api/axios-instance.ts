@@ -11,9 +11,6 @@ const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api
 export const axiosInstance = axios.create({
   baseURL: apiBaseUrl,
   withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
 // Request Interceptor: Attach token if available

@@ -27,7 +27,7 @@ const profileSchema = z.object({
   }
 });
 type ProfileForm = z.infer<typeof profileSchema>;
-const MAX_PHOTO_SIZE = 5 * 1024 * 1024;
+const MAX_PHOTO_SIZE = 3 * 1024 * 1024;
 const ALLOWED_PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export default function ProfilePanel() {
@@ -78,7 +78,8 @@ export default function ProfilePanel() {
   const upload = useMutation({
     mutationFn: (photo: File) => profileService.uploadProfilePhoto(photo, setUploadProgress),
     onSuccess: (user) => {
-      syncUser({ ...user, updatedAt: user.updatedAt ?? String(Date.now()) });
+      syncUser({ ...profile.data, ...user, updatedAt: user.updatedAt ?? String(Date.now()) });
+      setPhotoError("");
       setFile(null);
       setPreviewUrl(null);
       setUploadProgress(0);
@@ -86,8 +87,10 @@ export default function ProfilePanel() {
       toast.success("Profile photo uploaded successfully.");
     },
     onError: (error) => {
+      const message = getApiErrorMessage(error, "Profile photo could not be uploaded.");
       setUploadProgress(0);
-      toast.error(getApiErrorMessage(error, "Profile photo could not be uploaded."));
+      setPhotoError(message);
+      toast.error(message);
     },
   });
   const remove = useMutation({
@@ -107,12 +110,18 @@ export default function ProfilePanel() {
     setPhotoError("");
     if (!selected) return;
     if (!ALLOWED_PHOTO_TYPES.includes(selected.type)) {
-      setPhotoError("Only JPG, JPEG, PNG, and WEBP image files are allowed");
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      setFile(null);
+      setPreviewUrl(null);
+      setPhotoError("Only JPG, JPEG, PNG, and WEBP image files are allowed.");
       event.target.value = "";
       return;
     }
     if (selected.size > MAX_PHOTO_SIZE) {
-      setPhotoError("File size must not exceed 5MB");
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      setFile(null);
+      setPreviewUrl(null);
+      setPhotoError("Profile picture must be 3 MB or smaller.");
       event.target.value = "";
       return;
     }
@@ -147,9 +156,9 @@ export default function ProfilePanel() {
           <div className="mx-auto flex size-40 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-slate-400 dark:bg-slate-800">
             {displayImage ? <Image unoptimized={Boolean(previewUrl)} src={displayImage} alt="Profile preview" width={160} height={160} className="size-40 object-cover" /> : <UserRound size={72} />}
           </div>
-          <input ref={inputRef} className="sr-only" id="profilePicture" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" onChange={choosePhoto} />
+          <input ref={inputRef} className="sr-only" id="profilePicture" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" disabled={busy} onChange={choosePhoto} />
           <div className="mt-4 grid gap-2">
-            <label htmlFor="profilePicture" aria-disabled={busy} className="cursor-pointer rounded-xl border border-slate-300 px-4 py-2 text-center text-sm font-semibold dark:border-slate-700">Choose Photo</label>
+            <label htmlFor="profilePicture" aria-disabled={busy} className={`rounded-xl border border-slate-300 px-4 py-2 text-center text-sm font-semibold dark:border-slate-700 ${busy ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}>Choose Photo</label>
             <button type="button" aria-disabled={!file || busy} onClick={() => {
               if (!file) {
                 setPhotoError("Please choose a profile picture first.");

@@ -46,6 +46,9 @@ export default function UserTable({ users, onDeleteClick }: UserTableProps) {
               <td className="px-4 py-3 text-gray-600">{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "-"}</td>
               <td className="px-4 py-3">
                 <div className="flex gap-3">
+                  <Link href={`/admin/users/${user._id}`} className="text-sm font-semibold text-slate-600">
+                    View
+                  </Link>
                   <Link href={`/admin/users/${user._id}/edit`} className="text-sm font-semibold text-arena-indigo">
                     Edit
                   </Link>
