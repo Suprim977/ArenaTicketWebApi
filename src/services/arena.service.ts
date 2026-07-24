@@ -2,6 +2,7 @@ import { axiosInstance, type ApiResponse } from "@/lib/api/axios-instance";
 import { getApiErrorMessage } from "@/lib/api/error-message";
 import { API_ENDPOINTS } from "@/lib/api/endpoints";
 import type { ArenaEvent, ArenaResult, Booking, EventCategorySummary } from "@/types/arena";
+import { getMediaUrl } from "@/lib/media-url";
 
 const authorization = (token?: string) => (token ? { Authorization: `Bearer ${token}` } : undefined);
 
@@ -48,12 +49,13 @@ const toArenaEvent = (tournament: BackendTournament): ArenaEvent => {
     seatsLeft: tournament.tiers?.reduce((sum, tier) => sum + (tier.available ?? 0), 0) ?? 0,
     status: tournament.status === "sold_out" ? "sold out" : "upcoming",
     description: tournament.description,
-    image: tournament.imageUrl,
+    image: getMediaUrl(tournament.imageUrl) ?? undefined,
+    tiers: tournament.tiers,
   };
 };
 
 const listTournaments = async (token?: string): Promise<ArenaResult<ArenaEvent[]>> => {
-  const result = await request<TournamentList>(() => axiosInstance.get(API_ENDPOINTS.events.list, { headers: authorization(token) }));
+  const result = await request<TournamentList>(() => axiosInstance.get(API_ENDPOINTS.events.list, { params: { limit: 100 }, headers: authorization(token) }));
   if (!result.data) return { ok: false, message: result.message };
   const tournaments = Array.isArray(result.data)
     ? result.data

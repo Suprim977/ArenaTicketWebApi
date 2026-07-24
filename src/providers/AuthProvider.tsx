@@ -47,7 +47,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     retry: false,
   });
 
-  const effectiveUser = (profileQuery.data as AuthUser | undefined) ?? user;
+  const profileUser = profileQuery.data as AuthUser | undefined;
+  const storedUserId = user?._id ?? user?.id;
+  const profileUserId = profileUser?._id ?? profileUser?.id;
+  const effectiveUser =
+    user && profileUser && storedUserId && profileUserId === storedUserId
+      ? profileUser
+      : user;
 
   useEffect(() => {
     if (profileQuery.data) {
@@ -60,11 +66,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [effectiveUser?.role, token]);
 
   const login = (newToken: string, newUser: AuthUser) => {
+    void queryClient.cancelQueries({ queryKey: ["current-user"] });
+    queryClient.removeQueries({ queryKey: ["current-user"] });
+    queryClient.setQueryData(["current-user"], newUser);
     setToken(newToken);
     setUser(newUser);
     localStorage.setItem("token", newToken);
     localStorage.setItem("user", JSON.stringify(newUser));
     setAuthCookies(newToken, newUser.role);
+    void queryClient.invalidateQueries({ queryKey: ["current-user"] });
   };
 
   const logout = () => {

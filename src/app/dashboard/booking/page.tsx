@@ -2,12 +2,14 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
+import { CheckCircle2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
 import { toast } from "sonner";
 import DashboardSkeleton from "@/components/DashboardSkeleton";
 import { dashboardApi } from "@/lib/api/dashboard-api";
 import { getApiErrorMessage } from "@/lib/api/error-message";
+import { formatMoney } from "@/lib/format";
 import type { PaymentMethod } from "@/types/payment";
 
 export default function BookingPage() {
@@ -60,7 +62,24 @@ function BookingContent() {
       ]);
       toast.success("Booking created. Continue to payment.");
       if (payment.paymentUrl) {
-        window.location.assign(payment.paymentUrl);
+        const gatewayUrl = new URL(payment.paymentUrl);
+        const method = gatewayUrl.pathname.split("/").filter(Boolean).at(-1) || paymentMethod;
+        window.sessionStorage.setItem("arena-payment-context", JSON.stringify({
+          eventTitle: event?.title,
+          eventDate: event?.date,
+          venue: event?.venue,
+          bookingRef: booking.bookingRef,
+          tier: activeTier?.name,
+          quantity,
+          amount: payment.payment?.amount ?? booking.totalAmount,
+          method,
+        }));
+        const query = new URLSearchParams({
+          method,
+          paymentId: gatewayUrl.searchParams.get("paymentId") || "",
+          token: gatewayUrl.searchParams.get("token") || "",
+        });
+        router.push(`/payment/mock?${query.toString()}`);
         return;
       }
       router.push(`/dashboard/ticket/${booking.bookingRef || booking._id}`);
@@ -90,9 +109,9 @@ function BookingContent() {
           <div>
             <h2 className="font-bold">Payment method</h2>
             <div className="mt-3 grid gap-3 sm:grid-cols-3">
-              <button type="button" onClick={() => setPaymentMethod("esewa")} className={`flex items-center justify-center gap-2 rounded-xl border p-4 font-bold ${paymentMethod === "esewa" ? "border-indigo-600 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40" : "border-slate-200 dark:border-slate-700"}`}><Image src="/esewa.svg" alt="" width={22} height={22} />eSewa</button>
-              <button type="button" onClick={() => setPaymentMethod("khalti")} className={`flex items-center justify-center gap-2 rounded-xl border p-4 font-bold ${paymentMethod === "khalti" ? "border-indigo-600 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40" : "border-slate-200 dark:border-slate-700"}`}><Image src="/khalti.jpg" alt="" width={24} height={24} className="size-6 rounded-md object-cover" />Khalti</button>
-              <button type="button" onClick={() => setPaymentMethod("card")} className={`flex items-center justify-center gap-2 rounded-xl border p-4 font-bold ${paymentMethod === "card" ? "border-indigo-600 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40" : "border-slate-200 dark:border-slate-700"}`}><Image src="/card-brands.svg" alt="Visa and Mastercard" width={48} height={24} />Card</button>
+              <button type="button" onClick={() => setPaymentMethod("esewa")} aria-pressed={paymentMethod === "esewa"} className={`flex items-center justify-center gap-2 rounded-xl border p-4 font-bold ${paymentMethod === "esewa" ? "border-indigo-600 bg-indigo-50 text-indigo-700 ring-2 ring-indigo-600/20 dark:bg-indigo-950/40" : "border-slate-200 dark:border-slate-700"}`}><Image src="/esewa.svg" alt="" width={22} height={22} />eSewa{paymentMethod === "esewa" && <CheckCircle2 size={18} />}</button>
+              <button type="button" onClick={() => setPaymentMethod("khalti")} aria-pressed={paymentMethod === "khalti"} className={`flex items-center justify-center gap-2 rounded-xl border p-4 font-bold ${paymentMethod === "khalti" ? "border-indigo-600 bg-indigo-50 text-indigo-700 ring-2 ring-indigo-600/20 dark:bg-indigo-950/40" : "border-slate-200 dark:border-slate-700"}`}><Image src="/khalti.jpg" alt="" width={24} height={24} className="size-6 rounded-md object-cover" />Khalti{paymentMethod === "khalti" && <CheckCircle2 size={18} />}</button>
+              <button type="button" onClick={() => setPaymentMethod("card")} aria-pressed={paymentMethod === "card"} className={`flex items-center justify-center gap-2 rounded-xl border p-4 font-bold ${paymentMethod === "card" ? "border-indigo-600 bg-indigo-50 text-indigo-700 ring-2 ring-indigo-600/20 dark:bg-indigo-950/40" : "border-slate-200 dark:border-slate-700"}`}><Image src="/card-brands.svg" alt="Visa and Mastercard" width={48} height={24} />Card{paymentMethod === "card" && <CheckCircle2 size={18} />}</button>
             </div>
             {checkoutError && <p role="alert" className="mt-3 text-sm text-rose-600">{checkoutError}</p>}
           </div>
@@ -100,12 +119,14 @@ function BookingContent() {
         <aside className="rounded-2xl bg-slate-950 p-6 text-white">
           <p className="text-xs font-bold uppercase tracking-widest text-indigo-300">Order summary</p>
           <div className="mt-6 space-y-3 text-sm">
-            <p className="flex justify-between"><span>Ticket price</span><span>Rs {(activeTier?.price ?? 0).toLocaleString("en-NP")}</span></p>
+            <p className="flex justify-between gap-4"><span className="text-slate-400">Event</span><span className="text-right font-semibold">{event.title}</span></p>
+            <p className="flex justify-between"><span className="text-slate-400">Ticket type</span><span className="font-semibold">{activeTier?.name}</span></p>
+            <p className="flex justify-between"><span>Ticket price</span><span>{formatMoney(activeTier?.price)}</span></p>
             <p className="flex justify-between"><span>Quantity</span><span>{quantity}</span></p>
-            <p className="flex justify-between border-t border-slate-700 pt-4 text-lg font-black"><span>Total</span><span>Rs {total.toLocaleString("en-NP")}</span></p>
+            <p className="flex justify-between border-t border-slate-700 pt-4 text-lg font-black"><span>Total</span><span>{formatMoney(total)}</span></p>
           </div>
-          <button onClick={() => checkout.mutate()} disabled={checkout.isPending} className="mt-7 w-full rounded-xl bg-indigo-600 px-4 py-3 font-bold hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60">{checkout.isPending ? "Processing payment..." : "Confirm Payment"}</button>
-          <p className="mt-3 text-center text-xs text-slate-400">Payment is mocked; booking and initiation APIs are called.</p>
+          <button onClick={() => checkout.mutate()} disabled={checkout.isPending} className="mt-7 w-full rounded-xl bg-indigo-600 px-4 py-3 font-bold hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60">{checkout.isPending ? "Preparing payment..." : "Confirm Payment"}</button>
+          <p className="mt-3 text-center text-xs text-slate-400">Secure demo checkout. No real money will be charged.</p>
         </aside>
       </div>
     </section>

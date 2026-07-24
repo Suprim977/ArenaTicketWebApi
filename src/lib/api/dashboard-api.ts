@@ -8,6 +8,7 @@ import type { InitiatePaymentPayload, InitiatePaymentResult, Payment } from "@/t
 import type { Ticket } from "@/types/ticket";
 import type { User } from "@/types/user";
 import { profileService } from "@/services/profile.service";
+import { getMediaUrl, normalizeMediaPath } from "@/lib/media-url";
 
 type ListPayload<T> = T[] | { data?: T[]; events?: T[]; bookings?: T[]; tickets?: T[]; users?: T[]; payments?: T[] };
 type ItemPayload<T> = T | { event?: T; booking?: T; payment?: T };
@@ -92,7 +93,8 @@ const normalizeEvent = (event: BackendEvent): Event => {
   return {
     ...event,
     venue: event.venue || event.location || "Venue TBA",
-    image: event.image || event.imageUrl,
+    image: getMediaUrl(event.image || event.imageUrl) ?? undefined,
+    imageUrl: normalizeMediaPath(event.imageUrl ?? event.image) ?? undefined,
     startTime: event.startTime || event.time || (event.date ? new Date(event.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : undefined),
     status: event.status || (Number.isNaN(eventTime) || eventTime >= Date.now() ? "upcoming" : "completed"),
     priceFrom: event.priceFrom ?? event.ticketPrices?.normal ?? lowestTierPrice ?? 0,
@@ -109,7 +111,7 @@ const normalizeBooking = (booking: BackendBooking): Booking => ({
 export const dashboardApi = {
   getMe: profileService.getProfile,
   getEvents: async (filters: EventFilters = {}) =>
-    unwrapList<BackendEvent>((await axiosInstance.get(API_ENDPOINTS.events.list, { params: filters })).data).map(normalizeEvent),
+    unwrapList<BackendEvent>((await axiosInstance.get(API_ENDPOINTS.events.list, { params: { limit: 100, ...filters } })).data).map(normalizeEvent),
   getEvent: async (id: string) =>
     normalizeEvent(unwrapItem<BackendEvent>((await axiosInstance.get(API_ENDPOINTS.events.byId(id))).data)),
   getConfirmedBookings: async () =>
@@ -126,6 +128,14 @@ export const dashboardApi = {
     normalizeBooking(unwrapItem<BackendBooking>((await axiosInstance.post(API_ENDPOINTS.bookings.create, payload)).data)),
   initiatePayment: async (payload: InitiatePaymentPayload) =>
     unwrap<InitiatePaymentResult>((await axiosInstance.post(API_ENDPOINTS.payments.initiate, payload)).data),
+  uploadEventImage: async (file: File) => {
+    const formData = new FormData();
+    formData.append("banner", file);
+    const uploaded = unwrap<{ fileUrl: string }>((await axiosInstance.post(API_ENDPOINTS.uploads.eventBanner, formData)).data);
+    const publicPath = normalizeMediaPath(uploaded.fileUrl);
+    if (!publicPath) throw new Error("Event image upload failed.");
+    return publicPath;
+  },
   updateMe: profileService.updateProfile,
   updatePassword: async (payload: { currentPassword: string; newPassword: string }) =>
     axiosInstance.patch(API_ENDPOINTS.auth.password, payload),
@@ -144,7 +154,7 @@ export const dashboardApi = {
   updateAdminEvent: async (id: string, payload: AdminEventPayload) =>
     normalizeEvent(unwrapItem<BackendEvent>((await axiosInstance.patch(API_ENDPOINTS.events.byId(id), eventRequest(payload))).data)),
   getAdminBookings: async () =>
-    unwrapList<Booking>((await axiosInstance.get(API_ENDPOINTS.adminBookings.list)).data),
+    unwrapList<BackendBooking>((await axiosInstance.get(API_ENDPOINTS.adminBookings.list)).data).map(normalizeBooking),
   getAdminPayments: async () =>
     unwrapList<Payment>((await axiosInstance.get(API_ENDPOINTS.adminPayments.list)).data),
   getAdminTickets: async () =>

@@ -11,10 +11,12 @@ type UserData = {
   email: string;
   role: string;
   createdAt?: string;
-  person?: {
-    firstName?: string;
-    lastName?: string;
-  };
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
+  countryCode?: string;
+  gender?: string;
+  profilePicture?: string | null;
 };
 
 export default function AdminUsersPage() {
@@ -56,7 +58,7 @@ export default function AdminUsersPage() {
     const q = query.toLowerCase();
 
     return users.filter((user) => {
-      const fullName = `${user.person?.firstName || ""} ${user.person?.lastName || ""}`.toLowerCase();
+      const fullName = `${user.firstName || ""} ${user.lastName || ""}`.toLowerCase();
       return fullName.includes(q) || user.email.toLowerCase().includes(q);
     });
   }, [users, query]);

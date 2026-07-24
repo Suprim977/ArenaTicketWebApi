@@ -17,6 +17,7 @@ export type ArenaEvent = {
   status: EventStatus;
   description: string;
   image?: string;
+  tiers?: { name: string; price: number; available?: number }[];
 };
 
 export type Booking = {

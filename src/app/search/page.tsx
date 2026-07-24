@@ -24,6 +24,8 @@ function SearchContent() {
   const setCategory = useEventFiltersStore((state) => state.setCategory);
   const [events, setEvents] = useState<ArenaEvent[]>([]);
   const [categories, setCategories] = useState<EventCategorySummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const categoryParam = searchParams.get("category");
@@ -34,9 +36,21 @@ function SearchContent() {
 
   useEffect(() => {
     void getEventsAction().then((result) => {
+      if (!result.ok) {
+        setError("Events could not be loaded.");
+        setLoading(false);
+        return;
+      }
       const apiEvents = result.data ?? [];
       setEvents(apiEvents);
-      setCategories([{ name: "Festival", label: "Tournaments", description: "Live tournaments from the API.", count: apiEvents.length }]);
+      const uniqueCategories = [...new Set(apiEvents.map((event) => event.category))];
+      setCategories(uniqueCategories.map((name) => ({
+        name,
+        label: name,
+        description: `${name} events`,
+        count: apiEvents.filter((event) => event.category === name).length,
+      })));
+      setLoading(false);
     });
   }, []);
 
@@ -58,9 +72,10 @@ function SearchContent() {
 
       <EventFilterBar categories={categories} />
 
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-        {filteredEvents.map((event) => <EventCard key={event.id} event={event} />)}
-      </div>
+      {loading && <p className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-500 dark:border-slate-800 dark:bg-slate-900">Loading events...</p>}
+      {error && !loading && <p className="rounded-xl bg-rose-50 p-4 text-rose-700 dark:bg-rose-950/30 dark:text-rose-300">Events could not be loaded.</p>}
+      {!loading && !error && <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">{filteredEvents.map((event) => <EventCard key={event.id} event={event} />)}</div>}
+      {!loading && !error && !filteredEvents.length && <p className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-slate-500 dark:border-slate-700">No upcoming events available.</p>}
     </main>
   );
 }

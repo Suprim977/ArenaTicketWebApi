@@ -33,13 +33,16 @@ export default function EditUserPage() {
   if (error || !user) return <p className="rounded-xl bg-red-50 p-4 text-sm text-red-600">{error || "User not found."}</p>;
 
   return (
-    <section className="space-y-4">
-      <h2 className="text-2xl font-bold text-gray-900">Edit User</h2>
+    <section className="space-y-5">
+      <header className="mx-auto max-w-3xl"><p className="label-mini">Users</p><h1 className="mt-2 text-3xl font-black text-slate-950 dark:text-white">Edit User</h1><p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Update this ArenaTicket account.</p></header>
       <UserForm
-        submitLabel="Update User"
+        mode="edit"
         defaultValues={{
-          firstName: user.person?.firstName,
-          lastName: user.person?.lastName,
+          firstName: user.firstName ?? user.person?.firstName,
+          lastName: user.lastName ?? user.person?.lastName,
+          countryCode: user.countryCode as "+977" | "+91" | "+1" | "+44" | undefined,
+          phoneNumber: user.phoneNumber,
+          gender: user.gender as "male" | "female" | "other" | undefined,
           email: user.email,
           role: user.role,
         }}

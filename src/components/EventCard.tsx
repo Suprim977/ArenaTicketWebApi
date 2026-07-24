@@ -1,46 +1,22 @@
+import { CalendarDays, MapPin } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
+import { formatDate, formatMoney } from "@/lib/format";
 import type { ArenaEvent } from "@/types/arena";
 
-type EventCardProps = {
-  event: ArenaEvent;
-};
-
-export default function EventCard({ event }: EventCardProps) {
+export default function EventCard({ event }: { event: ArenaEvent }) {
   return (
-    <article className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-card transition hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="label-mini">{event.category}</p>
-          <h3 className="mt-2 text-xl font-bold text-slate-900 dark:text-white">{event.title}</h3>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{event.venue} · {event.city}</p>
-        </div>
-        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-          {event.status}
-        </span>
+    <article className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-card transition hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900">
+      <div className="relative h-48 bg-slate-100 dark:bg-slate-800">
+        {event.image ? <Image src={event.image} alt="" fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" /> : <div className="flex h-full items-center justify-center text-sm text-slate-400">ArenaTicket Event</div>}
       </div>
-
-      <p className="mt-4 text-sm leading-6 text-slate-600 dark:text-slate-300">{event.description}</p>
-
-      <div className="mt-5 grid grid-cols-3 gap-3 text-sm text-slate-600 dark:text-slate-300">
-        <div className="rounded-2xl bg-slate-50 p-3 dark:bg-slate-800">
-          <p className="text-xs uppercase tracking-[0.12em] text-slate-500">Date</p>
-          <p className="mt-1 font-semibold text-slate-900 dark:text-white">{event.date}</p>
+      <div className="p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div><p className="label-mini">{event.category}</p><h3 className="mt-2 text-xl font-bold">{event.title}</h3><p className="mt-2 flex items-center gap-1 text-sm text-slate-500"><MapPin size={15} />{event.venue}</p></div>
+          <span className={`rounded-full px-3 py-1 text-xs font-bold capitalize ${event.seatsLeft > 0 ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"}`}>{event.seatsLeft > 0 ? "Available" : "Sold out"}</span>
         </div>
-        <div className="rounded-2xl bg-slate-50 p-3 dark:bg-slate-800">
-          <p className="text-xs uppercase tracking-[0.12em] text-slate-500">Time</p>
-          <p className="mt-1 font-semibold text-slate-900 dark:text-white">{event.time}</p>
-        </div>
-        <div className="rounded-2xl bg-slate-50 p-3 dark:bg-slate-800">
-          <p className="text-xs uppercase tracking-[0.12em] text-slate-500">From</p>
-          <p className="mt-1 font-semibold text-slate-900 dark:text-white">Rs {event.priceFrom.toLocaleString("en-NP")}</p>
-        </div>
-      </div>
-
-      <div className="mt-5 flex items-center justify-between">
-        <p className="text-sm text-slate-500 dark:text-slate-400">{event.seatsLeft} seats left</p>
-        <Link href={`/event/${event.id}`} className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200">
-          View details
-        </Link>
+        <div className="mt-5 flex items-center justify-between gap-4 text-sm"><p className="flex items-center gap-1 text-slate-500"><CalendarDays size={16} />{formatDate(event.date)}</p><p className="font-black">From {formatMoney(event.priceFrom)}</p></div>
+        <div className="mt-5 flex items-center justify-between"><p className="text-sm text-slate-500">{event.seatsLeft} seats left</p><Link href={`/event/${event.id}`} className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white dark:bg-white dark:text-slate-900">View Event</Link></div>
       </div>
     </article>
   );

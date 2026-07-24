@@ -5,7 +5,7 @@ export type TicketStatus = "valid" | "used" | "cancelled";
 export interface Ticket {
   _id: string;
   id?: string;
-  userId?: string;
+  userId?: string | import("./user").User;
   bookingId: string | { _id: string; bookingRef?: string; status?: string; totalAmount?: number; paymentMethod?: string };
   eventId: Event | string;
   ticketNumber: string;

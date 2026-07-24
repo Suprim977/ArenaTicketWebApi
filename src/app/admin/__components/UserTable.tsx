@@ -1,66 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
+import { formatDate } from "@/lib/format";
+import { getProfileImageUrl } from "@/lib/profile-image";
 
-type UserRow = {
-  _id: string;
-  email: string;
-  role: string;
-  createdAt?: string;
-  person?: {
-    firstName?: string;
-    lastName?: string;
-  };
-};
+type UserRow = { _id: string; email: string; role: string; createdAt?: string; firstName?: string; lastName?: string; phoneNumber?: string; countryCode?: string; gender?: string; profilePicture?: string | null };
 
-type UserTableProps = {
-  users: UserRow[];
-  onDeleteClick: (id: string) => void;
-};
-
-export default function UserTable({ users, onDeleteClick }: UserTableProps) {
-  return (
-    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-      <table className="min-w-full text-left text-sm">
-        <thead className="bg-gray-50 text-xs uppercase tracking-[0.14em] text-gray-500">
-          <tr>
-            <th className="px-4 py-3">ID</th>
-            <th className="px-4 py-3">Name</th>
-            <th className="px-4 py-3">Email</th>
-            <th className="px-4 py-3">Role</th>
-            <th className="px-4 py-3">Created Date</th>
-            <th className="px-4 py-3">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user) => (
-            <tr key={user._id} className="border-t border-gray-100">
-              <td className="px-4 py-3 text-xs text-gray-500">{user._id.slice(0, 10)}...</td>
-              <td className="px-4 py-3 font-medium text-gray-800">
-                {user.person?.firstName || "-"} {user.person?.lastName || ""}
-              </td>
-              <td className="px-4 py-3 text-gray-600">{user.email}</td>
-              <td className="px-4 py-3">
-                <span className="rounded-full bg-indigo-50 px-2 py-1 text-xs font-semibold capitalize text-indigo-600">{user.role}</span>
-              </td>
-              <td className="px-4 py-3 text-gray-600">{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "-"}</td>
-              <td className="px-4 py-3">
-                <div className="flex gap-3">
-                  <Link href={`/admin/users/${user._id}`} className="text-sm font-semibold text-slate-600">
-                    View
-                  </Link>
-                  <Link href={`/admin/users/${user._id}/edit`} className="text-sm font-semibold text-arena-indigo">
-                    Edit
-                  </Link>
-                  <button className="text-sm font-semibold text-red-500" onClick={() => onDeleteClick(user._id)}>
-                    Delete
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+export default function UserTable({ users, onDeleteClick }: { users: UserRow[]; onDeleteClick: (id: string) => void }) {
+  return <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"><table className="min-w-[980px] w-full text-left text-sm"><thead className="bg-gray-50 text-xs uppercase tracking-wider text-gray-500 dark:bg-slate-800"><tr><th className="px-4 py-3">Avatar</th><th className="px-4 py-3">Full Name</th><th className="px-4 py-3">Email</th><th className="px-4 py-3">Phone</th><th className="px-4 py-3">Gender</th><th className="px-4 py-3">Role</th><th className="px-4 py-3">Joined</th><th className="px-4 py-3">Actions</th></tr></thead><tbody>{users.map((user) => { const name = [user.firstName, user.lastName].filter(Boolean).join(" ") || "Name unavailable"; const avatar = getProfileImageUrl(user.profilePicture); return <tr key={user._id} className="border-t border-gray-100 dark:border-slate-800"><td className="px-4 py-3">{avatar ? <Image src={avatar} alt="" width={40} height={40} className="size-10 rounded-full object-cover" /> : <span className="flex size-10 items-center justify-center rounded-full bg-indigo-100 font-bold text-indigo-700">{name.slice(0, 1)}</span>}</td><td className="px-4 py-3 font-semibold">{name}</td><td className="px-4 py-3">{user.email}</td><td className="px-4 py-3">{[user.countryCode, user.phoneNumber].filter(Boolean).join(" ") || "Not provided"}</td><td className="px-4 py-3 capitalize">{user.gender || "Not provided"}</td><td className="px-4 py-3"><span className="rounded-full bg-indigo-50 px-2 py-1 text-xs font-semibold capitalize text-indigo-600">{user.role}</span></td><td className="px-4 py-3">{formatDate(user.createdAt)}</td><td className="px-4 py-3"><div className="flex gap-3"><Link href={`/admin/users/${user._id}`} className="font-semibold text-slate-600">View</Link><Link href={`/admin/users/${user._id}/edit`} className="font-semibold text-indigo-600">Edit</Link><button className="font-semibold text-red-500" onClick={() => onDeleteClick(user._id)}>Delete</button></div></td></tr>; })}</tbody></table></div>;
 }

@@ -1,6 +1,6 @@
-import { AxiosError } from "axios";
 import { axiosInstance } from "../../api/axios-instance";
 import { API_ENDPOINTS } from "../../api/endpoints";
+import { getApiErrorMessage } from "../../api/error-message";
 import type { AuthRole } from "@/types/auth";
 
 type ActionResult<T> = {
@@ -20,6 +20,12 @@ export type AdminUser = {
   email: string;
   role: AuthRole;
   createdAt?: string;
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
+  countryCode?: string;
+  gender?: string;
+  profilePicture?: string | null;
   person?: {
     firstName?: string;
     lastName?: string;
@@ -29,17 +35,16 @@ export type AdminUser = {
 export type AdminUserPayload = {
   firstName: string;
   lastName: string;
+  countryCode: "+977" | "+91" | "+1" | "+44";
+  phoneNumber: string;
+  gender: "male" | "female" | "other";
   email: string;
   password?: string;
   role: AuthRole;
 };
 
 const parseError = (error: unknown): string => {
-  if (error instanceof AxiosError) {
-    return error.response?.data?.message || "Request failed";
-  }
-
-  return "Unexpected error";
+  return getApiErrorMessage(error, "The user request could not be completed.");
 };
 
 export const getUsersAction = async (params: { page: number; limit: number }): Promise<ActionResult<AdminUser[]>> => {
@@ -48,8 +53,13 @@ export const getUsersAction = async (params: { page: number; limit: number }): P
     return {
       ok: true,
       message: response.data?.message || "Users fetched",
-      data: response.data?.data || [],
-      meta: response.data?.meta,
+      data: Array.isArray(response.data?.data) ? response.data.data : response.data?.data?.users || [],
+      meta: response.data?.meta ?? {
+        page: 1,
+        limit: (response.data?.data?.users || []).length || params.limit,
+        total: (response.data?.data?.users || []).length,
+        totalPages: 1,
+      },
     };
   } catch (error) {
     return { ok: false, message: parseError(error), data: [] };
@@ -59,7 +69,7 @@ export const getUsersAction = async (params: { page: number; limit: number }): P
 export const getUserByIdAction = async (id: string): Promise<ActionResult<AdminUser>> => {
   try {
     const response = await axiosInstance.get(API_ENDPOINTS.adminUsers.byId(id));
-    return { ok: true, message: response.data?.message || "User fetched", data: response.data?.data };
+    return { ok: true, message: response.data?.message || "User fetched", data: response.data?.data?.user ?? response.data?.data };
   } catch (error) {
     return { ok: false, message: parseError(error) };
   }
@@ -67,8 +77,17 @@ export const getUserByIdAction = async (id: string): Promise<ActionResult<AdminU
 
 export const createUserAction = async (payload: AdminUserPayload): Promise<ActionResult<AdminUser>> => {
   try {
-    const response = await axiosInstance.post(API_ENDPOINTS.adminUsers.list, payload);
-    return { ok: true, message: response.data?.message || "User created", data: response.data?.data };
+    const response = await axiosInstance.post(API_ENDPOINTS.adminUsers.list, {
+      firstName: payload.firstName.trim(),
+      lastName: payload.lastName.trim(),
+      email: payload.email.trim().toLowerCase(),
+      password: payload.password,
+      role: payload.role,
+      countryCode: payload.countryCode,
+      phoneNumber: payload.phoneNumber.trim(),
+      gender: payload.gender,
+    });
+    return { ok: true, message: response.data?.message || "User created", data: response.data?.data?.user ?? response.data?.data };
   } catch (error) {
     return { ok: false, message: parseError(error) };
   }
@@ -76,8 +95,12 @@ export const createUserAction = async (payload: AdminUserPayload): Promise<Actio
 
 export const updateUserAction = async (id: string, payload: AdminUserPayload): Promise<ActionResult<AdminUser>> => {
   try {
-    const response = await axiosInstance.patch(API_ENDPOINTS.adminUsers.byId(id), payload);
-    return { ok: true, message: response.data?.message || "User updated", data: response.data?.data };
+    const response = await axiosInstance.patch(API_ENDPOINTS.adminUsers.byId(id), {
+      firstName: payload.firstName.trim(),
+      lastName: payload.lastName.trim(),
+      role: payload.role,
+    });
+    return { ok: true, message: response.data?.message || "User updated", data: response.data?.data?.user ?? response.data?.data };
   } catch (error) {
     return { ok: false, message: parseError(error) };
   }

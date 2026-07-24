@@ -43,4 +43,5 @@ export const API_ENDPOINTS = {
     photo: "/users/profile/photo",
   },
   payments: { initiate: "/payments/initiate" },
+  uploads: { eventBanner: "/upload/tournament-banner" },
 } as const;

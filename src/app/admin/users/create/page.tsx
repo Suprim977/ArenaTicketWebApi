@@ -5,10 +5,10 @@ import { createUserAction } from "@/lib/actions/admin/user-action";
 
 export default function CreateUserPage() {
   return (
-    <section className="space-y-4">
-      <h2 className="text-2xl font-bold text-gray-900">Create User</h2>
+    <section className="space-y-5">
+      <header className="mx-auto max-w-3xl"><p className="label-mini">Users</p><h1 className="mt-2 text-3xl font-black text-slate-950 dark:text-white">Create User</h1><p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Create a new ArenaTicket account.</p></header>
       <UserForm
-        submitLabel="Create User"
+        mode="create"
         onSubmitAction={async (values) => {
           return createUserAction(values);
         }}

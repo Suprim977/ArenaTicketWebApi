@@ -39,7 +39,7 @@ export default function ProfilePanel() {
   const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
   const [photoError, setPhotoError] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
-  const profile = useQuery({ queryKey: ["current-user"], queryFn: profileService.getProfile });
+  const profile = useQuery({ queryKey: ["current-user"], queryFn: profileService.getProfile, refetchOnMount: "always" });
   const { register, handleSubmit, reset, formState: { errors } } = useForm<ProfileForm>({ resolver: zodResolver(profileSchema) });
 
   const syncUser = (user: User) => {
@@ -80,6 +80,9 @@ export default function ProfilePanel() {
     mutationFn: (photo: File) => profileService.uploadProfilePhoto(photo, setUploadProgress),
     onSuccess: (user) => {
       syncUser({ ...profile.data, ...user, updatedAt: user.updatedAt ?? String(Date.now()) });
+      if (previewUrl?.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+      setFailedImageUrl(null);
       setPhotoError("");
       setFile(null);
       setUploadProgress(0);

@@ -1,14 +1,18 @@
 import Link from "next/link";
+import Image from "next/image";
 import { CalendarDays, MapPin } from "lucide-react";
 import type { Event } from "@/types/event";
+import { getMediaUrl } from "@/lib/media-url";
 
 export default function DashboardEventCard({ event }: { event: Event }) {
   const id = event._id || event.id;
   const price = event.priceFrom ??
     (event.tiers?.length ? Math.min(...event.tiers.map((tier) => tier.price)) : 0);
+  const image = getMediaUrl(event.image ?? event.imageUrl);
 
   return (
     <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900">
+      <div className="relative h-40 bg-slate-100 dark:bg-slate-800">{image ? <Image src={image} alt="" fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" /> : <div className="flex h-full items-center justify-center text-sm font-semibold text-slate-400">ArenaTicket Event</div>}</div>
       <div className="h-2 bg-linear-to-r from-indigo-600 to-violet-600" />
       <div className="p-5">
         <div className="flex items-start justify-between gap-3">
