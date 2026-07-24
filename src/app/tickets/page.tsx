@@ -1,7 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Logo from "@/app/__components/Logo";
 import DashboardSkeleton from "@/components/DashboardSkeleton";
 import TicketQR from "@/components/TicketQR";
@@ -10,12 +12,25 @@ import { getApiErrorMessage } from "@/lib/api/error-message";
 import type { Event } from "@/types/event";
 
 export default function TicketsPage() {
+  const router = useRouter();
   const tickets = useQuery({ queryKey: ["tickets"], queryFn: dashboardApi.getTickets });
   if (tickets.isLoading) return <main className="mx-auto max-w-6xl px-6 py-10"><DashboardSkeleton cards={3} /></main>;
   if (tickets.isError) return <main className="mx-auto max-w-6xl px-6 py-10"><p className="rounded-xl bg-rose-50 p-4 text-rose-700">{getApiErrorMessage(tickets.error, "Tickets could not be loaded.")}</p></main>;
 
   return (
     <main className="mx-auto min-h-screen max-w-6xl px-6 py-10">
+      <button
+        type="button"
+        onClick={() => {
+          if (window.history.length > 1) router.back();
+          else router.push("/dashboard");
+        }}
+        className="mb-6 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-indigo-700 dark:hover:bg-slate-800 dark:hover:text-indigo-300"
+        aria-label="Go back to the previous page"
+      >
+        <ArrowLeft size={17} aria-hidden />
+        Go Back
+      </button>
       <header><p className="label-mini">My Tickets</p><h1 className="mt-2 text-3xl font-black">Your QR tickets</h1><p className="mt-2 text-sm text-slate-500">Confirmed tickets issued after successful payment.</p></header>
       <div className="mt-7 grid gap-5 lg:grid-cols-2">
         {tickets.data?.map((ticket) => {
