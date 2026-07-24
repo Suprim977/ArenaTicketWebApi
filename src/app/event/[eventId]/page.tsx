@@ -66,7 +66,7 @@ export default function EventDetailPage({ params }: { params: { eventId: string 
         </div>
 
         <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="/booking" className="primary-btn">
+          <Link href={`/dashboard/booking?eventId=${event.id}`} className="primary-btn">
             Buy Ticket
           </Link>
           <Link href="/search" className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">

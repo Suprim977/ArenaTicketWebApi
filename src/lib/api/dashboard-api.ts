@@ -4,11 +4,12 @@ import type { ApiEnvelope } from "@/types/api";
 import type { Booking } from "@/types/booking";
 import type { CreateBookingPayload } from "@/types/booking";
 import type { Event, EventFilters } from "@/types/event";
-import type { InitiatePaymentPayload, Payment } from "@/types/payment";
+import type { InitiatePaymentPayload, InitiatePaymentResult, Payment } from "@/types/payment";
+import type { Ticket } from "@/types/ticket";
 import type { User } from "@/types/user";
 import { profileService } from "@/services/profile.service";
 
-type ListPayload<T> = T[] | { data: T[]; events?: T[]; bookings?: T[] };
+type ListPayload<T> = T[] | { data: T[]; events?: T[]; bookings?: T[]; tickets?: T[] };
 type ItemPayload<T> = T | { event?: T; booking?: T; payment?: T };
 
 const unwrap = <T>(payload: T | ApiEnvelope<T>): T => {
@@ -21,7 +22,7 @@ const unwrap = <T>(payload: T | ApiEnvelope<T>): T => {
 const unwrapList = <T>(payload: ListPayload<T> | ApiEnvelope<ListPayload<T>>): T[] => {
   const value = unwrap(payload);
   if (Array.isArray(value)) return value;
-  return value.events ?? value.bookings ?? value.data ?? [];
+  return value.events ?? value.bookings ?? value.tickets ?? value.data ?? [];
 };
 
 const unwrapItem = <T>(payload: ItemPayload<T> | ApiEnvelope<ItemPayload<T>>): T => {
@@ -38,6 +39,10 @@ type BackendEvent = Event & {
   location?: string;
   imageUrl?: string;
   time?: string;
+};
+type BackendBooking = Booking & {
+  eventId?: BackendEvent | string;
+  userId?: User | string;
 };
 
 export type AdminEventPayload = {
@@ -88,6 +93,12 @@ const normalizeEvent = (event: BackendEvent): Event => {
   };
 };
 
+const normalizeBooking = (booking: BackendBooking): Booking => ({
+  ...booking,
+  event: booking.event ?? (booking.eventId && typeof booking.eventId === "object" ? normalizeEvent(booking.eventId) : undefined),
+  user: booking.user ?? (booking.userId && typeof booking.userId === "object" ? booking.userId : undefined),
+});
+
 export const dashboardApi = {
   getMe: profileService.getProfile,
   getEvents: async (filters: EventFilters = {}) =>
@@ -95,17 +106,19 @@ export const dashboardApi = {
   getEvent: async (id: string) =>
     normalizeEvent(unwrapItem<BackendEvent>((await axiosInstance.get(API_ENDPOINTS.events.byId(id))).data)),
   getConfirmedBookings: async () =>
-    unwrapList<Booking>(
+    unwrapList<BackendBooking>(
       (await axiosInstance.get(API_ENDPOINTS.bookings.list, { params: { status: "confirmed" } })).data,
-    ),
+    ).map(normalizeBooking),
   getBookings: async (status?: string) =>
-    unwrapList<Booking>((await axiosInstance.get(API_ENDPOINTS.bookings.list, { params: { status } })).data),
+    unwrapList<BackendBooking>((await axiosInstance.get(API_ENDPOINTS.bookings.list, { params: { status } })).data).map(normalizeBooking),
+  getTickets: async () =>
+    unwrapList<Ticket>((await axiosInstance.get(API_ENDPOINTS.tickets.list)).data),
   getBooking: async (bookingRef: string) =>
-    unwrapItem<Booking>((await axiosInstance.get(API_ENDPOINTS.bookings.byRef(bookingRef))).data),
+    normalizeBooking(unwrapItem<BackendBooking>((await axiosInstance.get(API_ENDPOINTS.bookings.byRef(bookingRef))).data)),
   createBooking: async (payload: CreateBookingPayload) =>
-    unwrapItem<Booking>((await axiosInstance.post(API_ENDPOINTS.bookings.create, payload)).data),
+    normalizeBooking(unwrapItem<BackendBooking>((await axiosInstance.post(API_ENDPOINTS.bookings.create, payload)).data)),
   initiatePayment: async (payload: InitiatePaymentPayload) =>
-    unwrapItem<Payment>((await axiosInstance.post(API_ENDPOINTS.payments.initiate, payload)).data),
+    unwrap<InitiatePaymentResult>((await axiosInstance.post(API_ENDPOINTS.payments.initiate, payload)).data),
   updateMe: profileService.updateProfile,
   updatePassword: async (payload: { currentPassword: string; newPassword: string }) =>
     axiosInstance.put(API_ENDPOINTS.auth.password, payload),

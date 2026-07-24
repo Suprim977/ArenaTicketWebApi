@@ -14,7 +14,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
   if (query.isLoading) return <DashboardSkeleton />;
   if (!query.data || query.isError) return <p className="rounded-xl bg-rose-50 p-5 text-rose-700">This event could not be loaded.</p>;
   const event = query.data;
-  const tiers = event.tiers?.length ? event.tiers : [{ name: "Standard", price: event.priceFrom ?? 0 }, { name: "VIP", price: (event.priceFrom ?? 0) * 1.75 }];
+  const tiers = event.tiers ?? [];
 
   return (
     <section className="mx-auto max-w-5xl space-y-7">
@@ -30,6 +30,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
       </div>
       <div>
         <h2 className="text-2xl font-black text-slate-950 dark:text-white">Choose your tier</h2>
+        {!tiers.length && <p className="mt-4 rounded-xl bg-amber-50 p-4 text-amber-700">Ticket pricing is not configured for this event.</p>}
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           {tiers.map((tier) => (
             <article key={tier.name} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">

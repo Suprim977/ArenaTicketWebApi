@@ -16,8 +16,8 @@ export default function DashboardPage() {
 
   const user = profile.data;
   const confirmed = bookings.data ?? [];
-  const upcoming = confirmed.filter((booking) => new Date(booking.event?.date).getTime() >= now);
-  const attended = user?.eventsAttended ?? confirmed.filter((booking) => new Date(booking.event?.date).getTime() < now).length;
+  const upcoming = confirmed.filter((booking) => booking.event && new Date(booking.event.date).getTime() >= now);
+  const attended = user?.eventsAttended ?? confirmed.filter((booking) => booking.event && new Date(booking.event.date).getTime() < now).length;
   const name = [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "Player";
 
   return (
@@ -54,7 +54,7 @@ export default function DashboardPage() {
       <div>
         <h2 className="text-xl font-bold text-slate-950 dark:text-white">Upcoming Tournaments</h2>
         <div className="mt-4 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {upcoming.map((booking) => <DashboardEventCard key={booking._id} event={booking.event} />)}
+          {upcoming.map((booking) => booking.event ? <DashboardEventCard key={booking._id} event={booking.event} /> : null)}
         </div>
         {!upcoming.length && <p className="mt-4 rounded-2xl border border-dashed border-slate-300 p-8 text-center text-slate-500 dark:border-slate-700">No confirmed upcoming tournaments yet.</p>}
       </div>

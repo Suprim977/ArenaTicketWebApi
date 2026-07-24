@@ -29,7 +29,7 @@ export default function Navbar() {
       ]
       : [
         { href: "/", label: "Home" },
-        { href: "/search", label: "Events" },
+        { href: "/dashboard/events", label: "Events" },
         { href: "/dashboard", label: "Dashboard" },
         { href: "/bookings", label: "My Bookings" },
         { href: "/tickets", label: "My Tickets" },

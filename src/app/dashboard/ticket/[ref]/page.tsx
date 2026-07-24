@@ -22,7 +22,7 @@ export default function DigitalTicketPage({ params }: { params: Promise<{ ref: s
           <h1 className="mt-2 text-3xl font-black">{booking.event?.title ?? "Tournament Ticket"}</h1>
         </header>
         <div className="grid gap-8 p-7 md:grid-cols-[18rem_1fr]">
-          <div><TicketQR code={booking.bookingRef} /><p className="mt-4 text-center font-mono text-sm font-bold">#{booking.bookingRef}</p></div>
+          <div><TicketQR code={booking.bookingRef} qrCodeData={booking.qrCodeData} /><p className="mt-4 text-center font-mono text-sm font-bold">#{booking.bookingRef}</p></div>
           <div className="grid content-start gap-4 sm:grid-cols-2">
             {[
               ["Date", booking.event?.date ? new Date(booking.event.date).toLocaleString("en-NP", { dateStyle: "medium", timeStyle: "short" }) : "TBA"],

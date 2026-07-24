@@ -1,5 +1,5 @@
 export type PaymentMethod = "esewa" | "khalti" | "card";
-export type PaymentStatus = "pending" | "completed" | "failed" | "refunded";
+export type PaymentStatus = "pending" | "success" | "completed" | "failed" | "refunded";
 
 export interface Payment {
   _id: string;
@@ -8,11 +8,17 @@ export interface Payment {
   method: PaymentMethod;
   status: PaymentStatus;
   transactionId?: string;
+  transactionRef?: string;
   paymentUrl?: string;
   createdAt: string;
 }
 
 export interface InitiatePaymentPayload {
   bookingId: string;
-  method: PaymentMethod;
+  paymentMethod: PaymentMethod;
+}
+
+export interface InitiatePaymentResult {
+  payment: Payment;
+  paymentUrl?: string;
 }

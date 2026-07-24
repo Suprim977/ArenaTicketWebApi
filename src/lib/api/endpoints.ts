@@ -22,7 +22,7 @@ export const API_ENDPOINTS = {
     create: "/bookings",
   },
   tickets: {
-    byBookingRef: (bookingRef: string) => `/bookings/${bookingRef}`,
+    list: "/tickets/my",
   },
   adminUsers: {
     list: "/admin/users",
