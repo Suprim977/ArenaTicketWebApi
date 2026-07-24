@@ -39,7 +39,7 @@ export default function RegisterForm() {
         return;
       }
       reset();
-      toast.success("Registration successful! Please log in to continue.");
+      toast.success("Account created successfully. Please log in to continue.");
       router.replace(`/login?email=${encodeURIComponent(values.email.trim().toLowerCase())}`);
     } catch {
       setApiError("Unable to create your account right now. Please try again.");

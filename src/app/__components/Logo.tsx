@@ -4,10 +4,14 @@ import { Ticket } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/lib/contexts/AuthContext";
 
-export default function Logo() {
+type LogoProps = {
+  href?: string;
+};
+
+export default function Logo({ href }: LogoProps) {
   const { isAuthenticated } = useAuth();
   return (
-    <Link href={isAuthenticated ? "/dashboard" : "/"} className="inline-flex items-center gap-3" aria-label="ArenaTicket home">
+    <Link href={href ?? (isAuthenticated ? "/dashboard" : "/")} className="inline-flex items-center gap-3" aria-label="ArenaTicket home">
       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-fuchsia-500 to-indigo-500 text-white shadow-sm">
         <Ticket className="h-5 w-5" />
       </div>
