@@ -104,7 +104,7 @@ function BookingContent() {
             <p className="flex justify-between"><span>Quantity</span><span>{quantity}</span></p>
             <p className="flex justify-between border-t border-slate-700 pt-4 text-lg font-black"><span>Total</span><span>Rs {total.toLocaleString("en-NP")}</span></p>
           </div>
-          <button onClick={() => checkout.mutate()} disabled={checkout.isPending} className="mt-7 w-full rounded-xl bg-indigo-600 px-4 py-3 font-bold hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60">{checkout.isPending ? "Processing..." : "Confirm Payment"}</button>
+          <button onClick={() => checkout.mutate()} disabled={checkout.isPending} className="mt-7 w-full rounded-xl bg-indigo-600 px-4 py-3 font-bold hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60">{checkout.isPending ? "Processing payment..." : "Confirm Payment"}</button>
           <p className="mt-3 text-center text-xs text-slate-400">Payment is mocked; booking and initiation APIs are called.</p>
         </aside>
       </div>

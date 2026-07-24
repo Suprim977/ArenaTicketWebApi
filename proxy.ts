@@ -10,5 +10,6 @@ export const config = {
     "/login", "/register", "/forgot-password", "/reset-password",
     "/admin/:path*", "/dashboard/:path*", "/profile/:path*",
     "/bookings/:path*", "/tickets/:path*", "/booking/:path*", "/ticket/:path*",
+    "/payment/:path*",
   ],
 };
