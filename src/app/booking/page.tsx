@@ -27,7 +27,7 @@ export default function BookingPage() {
     resolver: zodResolver(bookingSchema),
     defaultValues: {
       eventId: "",
-      seatType: "General",
+      seatType: "Normal",
       quantity: 1,
       attendeeName: "Jordan Fan",
       attendeeEmail: "fan@arenaticket.com",
@@ -60,7 +60,8 @@ export default function BookingPage() {
       return;
     }
 
-    const result = await createBookingAction({ ...values, price: selectedEvent.priceFrom });
+    const ticketPrice = values.seatType === "VIP" ? 1500 : 600;
+    const result = await createBookingAction({ ...values, price: ticketPrice });
     const booking = result.data;
 
     if (!result.ok || !booking) {
@@ -110,8 +111,7 @@ export default function BookingPage() {
           <div>
             <label className="label-mini">Seat type</label>
             <select className="input-shell mt-1" {...register("seatType")}>
-              <option>General</option>
-              <option>Premium</option>
+              <option>Normal</option>
               <option>VIP</option>
             </select>
             {errors.seatType && <p className="mt-1 text-xs text-red-500">{errors.seatType.message}</p>}

@@ -1,21 +1,16 @@
-import { AxiosError } from "axios";
 import { axiosInstance, type ApiResponse } from "@/lib/api/axios-instance";
+import { getApiErrorMessage } from "@/lib/api/error-message";
 import { API_ENDPOINTS } from "@/lib/api/endpoints";
 import type { ArenaEvent, ArenaResult, Booking, EventCategorySummary } from "@/types/arena";
 
 const authorization = (token?: string) => (token ? { Authorization: `Bearer ${token}` } : undefined);
-
-const messageFor = (error: unknown) =>
-  error instanceof AxiosError && typeof error.response?.data?.message === "string"
-    ? error.response.data.message
-    : "Request failed";
 
 const request = async <T>(operation: () => Promise<ApiResponse<T>>): Promise<ArenaResult<T>> => {
   try {
     const response = await operation();
     return { ok: true, message: response.data.message ?? "Request completed", data: response.data.data };
   } catch (error) {
-    return { ok: false, message: messageFor(error) };
+    return { ok: false, message: getApiErrorMessage(error, "The request could not be completed.") };
   }
 };
 

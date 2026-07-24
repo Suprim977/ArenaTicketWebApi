@@ -2,12 +2,12 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Image from "next/image";
-import { CreditCard } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
 import { toast } from "sonner";
 import DashboardSkeleton from "@/components/DashboardSkeleton";
 import { dashboardApi } from "@/lib/api/dashboard-api";
+import { getApiErrorMessage } from "@/lib/api/error-message";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import type { PaymentMethod } from "@/types/payment";
 
@@ -27,12 +27,9 @@ function BookingContent() {
   const [method, setMethod] = useState<PaymentMethod>("esewa");
   const eventQuery = useQuery({ queryKey: ["event", eventId], queryFn: () => dashboardApi.getEvent(eventId), enabled: Boolean(eventId) });
   const event = eventQuery.data;
-  const tiers = useMemo(() => event?.tiers?.length ? event.tiers : event ? [{ name: "Standard", price: event.priceFrom ?? 0 }, { name: "VIP", price: (event.priceFrom ?? 0) * 1.75 }] : [], [event]);
+  const tiers = useMemo(() => [{ name: "Normal", price: 600 }, { name: "VIP", price: 1500 }], []);
   const activeTier = tiers.find((item) => item.name === tier) ?? tiers[0];
-  const subtotal = (activeTier?.price ?? 0) * quantity;
-  const bookingFee = subtotal * 0.05;
-  const tax = subtotal * 0.13;
-  const total = subtotal + bookingFee + tax;
+  const total = (activeTier?.price ?? 0) * quantity;
 
   const checkout = useMutation({
     mutationFn: async () => {
@@ -54,7 +51,7 @@ function BookingContent() {
       toast.success("Payment successful. Your ticket is ready.");
       router.push(`/dashboard/ticket/${booking.bookingRef || booking._id}`);
     },
-    onError: (error) => toast.error(error instanceof Error ? error.message : "Payment could not be completed."),
+    onError: (error) => toast.error(getApiErrorMessage(error, "Payment could not be completed.")),
   });
 
   if (!eventId) return <p className="rounded-2xl border border-dashed border-slate-300 p-10 text-center text-slate-500">Select an event from the Events tab to begin booking.</p>;
@@ -76,16 +73,15 @@ function BookingContent() {
             <div className="mt-3 grid gap-3 sm:grid-cols-3">
               <button onClick={() => setMethod("esewa")} className={`flex items-center justify-center gap-2 rounded-xl border p-4 font-bold ${method === "esewa" ? "border-indigo-600 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40" : "border-slate-200 dark:border-slate-700"}`}><Image src="/esewa.svg" alt="" width={22} height={22} />eSewa</button>
               <button onClick={() => setMethod("khalti")} className={`flex items-center justify-center gap-2 rounded-xl border p-4 font-bold ${method === "khalti" ? "border-indigo-600 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40" : "border-slate-200 dark:border-slate-700"}`}><Image src="/khalti.jpg" alt="" width={24} height={24} className="size-6 rounded-md object-cover" />Khalti</button>
-              <button onClick={() => setMethod("card")} className={`flex items-center justify-center gap-2 rounded-xl border p-4 font-bold ${method === "card" ? "border-indigo-600 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40" : "border-slate-200 dark:border-slate-700"}`}><CreditCard size={21} />Card</button>
+              <button onClick={() => setMethod("card")} className={`flex items-center justify-center gap-2 rounded-xl border p-4 font-bold ${method === "card" ? "border-indigo-600 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40" : "border-slate-200 dark:border-slate-700"}`}><Image src="/card-brands.svg" alt="Visa and Mastercard" width={48} height={24} />Card</button>
             </div>
           </div>
         </div>
         <aside className="rounded-2xl bg-slate-950 p-6 text-white">
           <p className="text-xs font-bold uppercase tracking-widest text-indigo-300">Order summary</p>
           <div className="mt-6 space-y-3 text-sm">
-            <p className="flex justify-between"><span>Subtotal</span><span>Rs {subtotal.toLocaleString("en-NP")}</span></p>
-            <p className="flex justify-between"><span>Booking fee (5%)</span><span>Rs {bookingFee.toLocaleString("en-NP")}</span></p>
-            <p className="flex justify-between"><span>VAT (13%)</span><span>Rs {tax.toLocaleString("en-NP")}</span></p>
+            <p className="flex justify-between"><span>Ticket price</span><span>Rs {(activeTier?.price ?? 0).toLocaleString("en-NP")}</span></p>
+            <p className="flex justify-between"><span>Quantity</span><span>{quantity}</span></p>
             <p className="flex justify-between border-t border-slate-700 pt-4 text-lg font-black"><span>Total</span><span>Rs {total.toLocaleString("en-NP")}</span></p>
           </div>
           <button onClick={() => checkout.mutate()} disabled={checkout.isPending} className="mt-7 w-full rounded-xl bg-indigo-600 px-4 py-3 font-bold hover:bg-indigo-500 disabled:opacity-60">{checkout.isPending ? "Processing…" : "Confirm Payment"}</button>

@@ -18,6 +18,13 @@ import type { User } from "@/types/user";
 const profileSchema = z.object({
   firstName: z.string().trim().min(2, "First name must be at least 2 characters").max(50),
   lastName: z.string().trim().min(2, "Last name must be at least 2 characters").max(50),
+  countryCode: z.enum(["+977", "+91", "+1", "+44"]),
+  phoneNumber: z.string().trim().regex(/^\d+$/, "Phone number must contain digits only"),
+  gender: z.enum(["male", "female", "other", "prefer_not_to_say"]),
+}).superRefine((data, context) => {
+  if (data.countryCode === "+977" && data.phoneNumber.length !== 10) {
+    context.addIssue({ code: "custom", path: ["phoneNumber"], message: "Nepal phone numbers must be exactly 10 digits" });
+  }
 });
 type ProfileForm = z.infer<typeof profileSchema>;
 const MAX_PHOTO_SIZE = 5 * 1024 * 1024;
@@ -40,7 +47,13 @@ export default function ProfilePanel() {
   };
 
   useEffect(() => {
-    if (profile.data) reset({ firstName: profile.data.firstName ?? "", lastName: profile.data.lastName ?? "" });
+    if (profile.data) reset({
+      firstName: profile.data.firstName ?? "",
+      lastName: profile.data.lastName ?? "",
+      countryCode: profile.data.countryCode ?? "+977",
+      phoneNumber: profile.data.phoneNumber ?? "",
+      gender: profile.data.gender ?? "prefer_not_to_say",
+    });
   }, [profile.data, reset]);
 
   useEffect(() => () => {
@@ -51,7 +64,13 @@ export default function ProfilePanel() {
     mutationFn: profileService.updateProfile,
     onSuccess: (user) => {
       syncUser(user);
-      reset({ firstName: user.firstName, lastName: user.lastName });
+      reset({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        countryCode: user.countryCode ?? "+977",
+        phoneNumber: user.phoneNumber ?? "",
+        gender: user.gender ?? "prefer_not_to_say",
+      });
       toast.success("Profile updated successfully.");
     },
     onError: (error) => toast.error(getApiErrorMessage(error, "Your profile could not be updated.")),
@@ -131,7 +150,13 @@ export default function ProfilePanel() {
           <input ref={inputRef} className="sr-only" id="profilePicture" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" onChange={choosePhoto} />
           <div className="mt-4 grid gap-2">
             <label htmlFor="profilePicture" aria-disabled={busy} className="cursor-pointer rounded-xl border border-slate-300 px-4 py-2 text-center text-sm font-semibold dark:border-slate-700">Choose Photo</label>
-            <button type="button" disabled={!file || busy} onClick={() => file && upload.mutate(file)} className="primary-btn">{upload.isPending ? `Uploading${uploadProgress ? ` ${uploadProgress}%` : "..."}` : "Upload Photo"}</button>
+            <button type="button" aria-disabled={!file || busy} onClick={() => {
+              if (!file) {
+                setPhotoError("Please choose a profile picture first.");
+                return;
+              }
+              if (!busy) upload.mutate(file);
+            }} className={`primary-btn ${!file || busy ? "cursor-not-allowed opacity-50" : ""}`}>{upload.isPending ? `Uploading${uploadProgress ? ` ${uploadProgress}%` : "..."}` : "Upload Photo"}</button>
             <button type="button" disabled={!user.profilePicture || busy} onClick={() => remove.mutate()} className="rounded-xl px-4 py-2 text-sm font-semibold text-rose-600 disabled:opacity-50">Remove Photo</button>
           </div>
           {photoError && <p role="alert" className="mt-2 text-sm text-rose-600">{photoError}</p>}
@@ -141,6 +166,10 @@ export default function ProfilePanel() {
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="text-sm font-semibold">First name<input className="input-shell mt-2" {...register("firstName")} />{errors.firstName && <span className="mt-1 block text-xs text-rose-600">{errors.firstName.message}</span>}</label>
               <label className="text-sm font-semibold">Last name<input className="input-shell mt-2" {...register("lastName")} />{errors.lastName && <span className="mt-1 block text-xs text-rose-600">{errors.lastName.message}</span>}</label>
+              <label className="text-sm font-semibold">Country code<select className="input-shell mt-2" {...register("countryCode")}><option value="+977">Nepal (+977)</option><option value="+91">India (+91)</option><option value="+1">USA (+1)</option><option value="+44">UK (+44)</option></select></label>
+              <label className="text-sm font-semibold">Phone number<input className="input-shell mt-2" inputMode="numeric" {...register("phoneNumber")} />{errors.phoneNumber && <span className="mt-1 block text-xs text-rose-600">{errors.phoneNumber.message}</span>}</label>
+              <label className="text-sm font-semibold">Gender<select className="input-shell mt-2" {...register("gender")}><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option><option value="prefer_not_to_say">Prefer not to say</option></select></label>
+              <label className="text-sm font-semibold">Email<input className="input-shell mt-2 cursor-not-allowed bg-slate-100 dark:bg-slate-800" value={user.email} readOnly aria-readonly /></label>
             </div>
             <button className="primary-btn" disabled={update.isPending}>{update.isPending ? "Saving..." : "Save changes"}</button>
           </form>
