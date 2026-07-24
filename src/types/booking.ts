@@ -11,12 +11,13 @@ export interface Booking {
   event?: Event;
   user?: User;
   tier?: string;
+  unitPrice?: number;
   section?: string;
   seats?: string[];
   quantity: number;
   subtotal: number;
-  bookingFee: number;
-  tax: number;
+  bookingFee?: number;
+  tax?: number;
   totalAmount: number;
   status: BookingStatus;
   attendeeName?: string;
@@ -29,7 +30,7 @@ export interface Booking {
 
 export interface CreateBookingPayload {
   eventId: string;
-  ticketTier: "Normal" | "VIP";
+  ticketTier: "normal" | "vip";
   section: string;
   quantity: number;
   paymentMethod: PaymentMethod;

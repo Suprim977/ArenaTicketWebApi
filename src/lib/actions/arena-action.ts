@@ -11,11 +11,3 @@ export const getCategoriesAction = async () => arenaService.listCategories(await
 export const searchEventsAction = async (query: string, category?: string) => arenaService.searchEvents(query, category, await getAuthToken());
 export const getBookingsAction = async () => arenaService.listBookings(await getAuthToken());
 export const getBookingByRefAction = async (bookingRef: string) => arenaService.getBookingByRef(bookingRef, await getAuthToken());
-export const createBookingAction = async (payload: {
-  eventId: string;
-  seatType: string;
-  quantity: number;
-  attendeeName: string;
-  attendeeEmail: string;
-  price: number;
-}) => arenaService.createBooking(payload, await getAuthToken());

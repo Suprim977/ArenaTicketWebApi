@@ -26,6 +26,14 @@ export interface Event {
   priceFrom?: number;
   seatsLeft?: number;
   tiers?: TicketTier[];
+  ticketPrices?: { normal: number; vip: number };
+  imageUrl?: string;
+  location?: string;
+  time?: string;
+  slug?: string;
+  availability?: boolean;
+  prizePool?: number;
+  format?: string;
   active?: boolean;
 }
 

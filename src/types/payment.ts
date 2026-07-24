@@ -3,7 +3,8 @@ export type PaymentStatus = "pending" | "success" | "completed" | "failed" | "re
 
 export interface Payment {
   _id: string;
-  bookingId: string;
+  bookingId: string | (import("./booking").Booking & { eventId?: import("./event").Event });
+  userId?: string | import("./user").User;
   amount: number;
   method: PaymentMethod;
   status: PaymentStatus;

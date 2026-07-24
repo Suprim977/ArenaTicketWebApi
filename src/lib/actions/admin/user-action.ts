@@ -76,7 +76,7 @@ export const createUserAction = async (payload: AdminUserPayload): Promise<Actio
 
 export const updateUserAction = async (id: string, payload: AdminUserPayload): Promise<ActionResult<AdminUser>> => {
   try {
-    const response = await axiosInstance.put(API_ENDPOINTS.adminUsers.byId(id), payload);
+    const response = await axiosInstance.patch(API_ENDPOINTS.adminUsers.byId(id), payload);
     return { ok: true, message: response.data?.message || "User updated", data: response.data?.data };
   } catch (error) {
     return { ok: false, message: parseError(error) };

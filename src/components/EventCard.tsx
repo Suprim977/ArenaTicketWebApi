@@ -5,12 +5,6 @@ type EventCardProps = {
   event: ArenaEvent;
 };
 
-const currency = new Intl.NumberFormat("en-NG", {
-  style: "currency",
-  currency: "NGN",
-  maximumFractionDigits: 0,
-});
-
 export default function EventCard({ event }: EventCardProps) {
   return (
     <article className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-card transition hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900">
@@ -38,7 +32,7 @@ export default function EventCard({ event }: EventCardProps) {
         </div>
         <div className="rounded-2xl bg-slate-50 p-3 dark:bg-slate-800">
           <p className="text-xs uppercase tracking-[0.12em] text-slate-500">From</p>
-          <p className="mt-1 font-semibold text-slate-900 dark:text-white">{currency.format(event.priceFrom)}</p>
+          <p className="mt-1 font-semibold text-slate-900 dark:text-white">Rs {event.priceFrom.toLocaleString("en-NP")}</p>
         </div>
       </div>
 

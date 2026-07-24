@@ -15,19 +15,34 @@ const request = async <T>(operation: () => Promise<ApiResponse<T>>): Promise<Act
 };
 
 type BackendAuthResponse = {
-  user: { _id: string; email: string; name: string; role: "USER" | "ADMIN" };
+  user: {
+    _id: string; email: string; name: string; role: "user" | "admin";
+    firstName: string; lastName: string; countryCode?: import("@/types/user").CountryCode;
+    phoneNumber?: string; gender?: import("@/types/user").Gender; profilePicture?: string | null;
+    balance?: number; ticketsCount?: number; eventsAttended?: number;
+  };
+  token?: string;
   tokens: { accessToken: string };
 };
 
 const normalizeAuthResponse = (data: BackendAuthResponse): AuthResponse => {
-  const [firstName = "", ...lastName] = data.user.name.trim().split(/\s+/);
+  const [nameFirst = "", ...nameLast] = data.user.name.trim().split(/\s+/);
   return {
-    token: data.tokens.accessToken,
+    token: data.token ?? data.tokens.accessToken,
     user: {
       _id: data.user._id,
       email: data.user.email,
-      role: data.user.role.toLowerCase() as AuthUser["role"],
-      person: { firstName, lastName: lastName.join(" ") },
+      role: data.user.role,
+      firstName: data.user.firstName ?? nameFirst,
+      lastName: data.user.lastName ?? nameLast.join(" "),
+      countryCode: data.user.countryCode,
+      phoneNumber: data.user.phoneNumber,
+      gender: data.user.gender,
+      profilePicture: data.user.profilePicture ?? null,
+      balance: data.user.balance,
+      totalTickets: data.user.ticketsCount,
+      eventsAttended: data.user.eventsAttended,
+      person: { firstName: data.user.firstName ?? nameFirst, lastName: data.user.lastName ?? nameLast.join(" ") },
     },
   };
 };

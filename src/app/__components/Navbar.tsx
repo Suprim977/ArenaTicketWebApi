@@ -15,11 +15,11 @@ const publicLinks = [
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const [open, setOpen] = useState(false);
   const links = isAuthenticated
-    ? publicLinks
-    : [...publicLinks, { href: "/login", label: "Login" }, { href: "/register", label: "Register" }];
+    ? [...publicLinks, { href: user?.role === "admin" ? "/admin" : "/dashboard", label: user?.role === "admin" ? "Admin Dashboard" : "Dashboard" }]
+    : [...publicLinks, { href: "/login", label: "Login" }, { href: "/register", label: "Sign Up" }];
 
   return (
     <header className="relative border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95">

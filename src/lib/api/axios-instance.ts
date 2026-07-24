@@ -6,7 +6,7 @@ export type ApiSuccessResponse<T> = ApiEnvelope<T>;
 export type ApiErrorResponse = ApiErrorBody;
 export type ApiResponse<T> = AxiosResponse<ApiSuccessResponse<T>>;
 
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1";
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8089/api/v1";
 
 export const axiosInstance = axios.create({
   baseURL: apiBaseUrl,

@@ -40,7 +40,7 @@ function BookingContent() {
       const bookingQuantity = Number(quantity);
       if (!Number.isInteger(bookingQuantity) || bookingQuantity < 1) throw new Error("Quantity must be at least 1.");
       if (!paymentMethod) throw new Error("Please select a payment method.");
-      const ticketTier: "Normal" | "VIP" = /^vip$/i.test(activeTier.name) ? "VIP" : "Normal";
+      const ticketTier: "normal" | "vip" = /^vip$/i.test(activeTier.name) ? "vip" : "normal";
       const booking = await dashboardApi.createBooking({
         eventId: event._id || event.id || eventId,
         ticketTier,

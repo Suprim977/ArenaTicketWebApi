@@ -1,4 +1,4 @@
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1";
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8089/api/v1";
 
 export const API_ENDPOINTS = {
   auth: {
@@ -8,7 +8,7 @@ export const API_ENDPOINTS = {
     resetPassword: "/auth/reset-password",
     whoami: "/users/profile",
     update: "/users/profile",
-    password: "/users/me/password",
+    password: "/users/change-password",
   },
   events: {
     list: "/events",
@@ -28,10 +28,7 @@ export const API_ENDPOINTS = {
     list: "/admin/users",
     byId: (id: string) => `/admin/users/${id}`,
   },
-  adminEvents: {
-    list: "/admin/events",
-    byId: (id: string) => `/admin/events/${id}`,
-  },
+  adminDashboard: "/admin/dashboard",
   adminBookings: {
     list: "/admin/bookings",
     byId: (id: string) => `/admin/bookings/${id}`,
@@ -39,9 +36,7 @@ export const API_ENDPOINTS = {
   adminPayments: {
     list: "/admin/payments",
   },
-  adminTickets: {
-    list: "/admin/tickets",
-  },
+  adminTickets: { list: "/tickets" },
   profile: {
     get: "/users/profile",
     update: "/users/profile",

@@ -37,7 +37,7 @@ export default function AdminEventsPage() {
             <thead className="bg-slate-50 text-xs uppercase tracking-wider text-slate-500 dark:bg-slate-800"><tr><th className="px-4 py-3">Event</th><th className="px-4 py-3">Date</th><th className="px-4 py-3">Normal</th><th className="px-4 py-3">VIP</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Actions</th></tr></thead>
             <tbody>{events.data.map((event) => {
               const id = event._id || event.id || "";
-              const normal = event.tiers?.find((tier) => tier.name.toLowerCase() === "normal");
+              const normal = event.tiers?.find((tier) => /^(normal|standard)$/i.test(tier.name));
               const vip = event.tiers?.find((tier) => tier.name.toLowerCase() === "vip");
               return <tr key={id} className="border-t border-slate-100 dark:border-slate-800"><td className="px-4 py-4"><p className="font-bold">{event.title}</p><p className="text-xs text-slate-500">{event.venue}</p></td><td className="px-4 py-4">{new Date(event.date).toLocaleDateString()}</td><td className="px-4 py-4">Rs {(normal?.price ?? 0).toLocaleString("en-NP")}</td><td className="px-4 py-4">Rs {(vip?.price ?? 0).toLocaleString("en-NP")}</td><td className="px-4 py-4 capitalize">{event.active === false ? "inactive" : event.status}</td><td className="px-4 py-4"><div className="flex gap-3"><Link href={`/event/${id}`} className="font-semibold text-slate-600">View</Link><Link href={`/admin/events/${id}/edit`} className="font-semibold text-indigo-600">Edit</Link><button onClick={() => setDeleteId(id)} className="font-semibold text-rose-600">Delete</button></div></td></tr>;
             })}</tbody>

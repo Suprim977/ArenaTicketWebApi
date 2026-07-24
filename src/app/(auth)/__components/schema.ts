@@ -11,7 +11,7 @@ export const registerSchema = z
     lastName: z.string().trim().min(2, "Last name must be at least 2 characters").max(50, "Last name must be at most 50 characters"),
     countryCode: z.enum(["+977", "+91", "+1", "+44"]),
     phoneNumber: z.string().trim().regex(/^\d+$/, "Phone number must contain digits only"),
-    gender: z.enum(["male", "female", "other", "prefer_not_to_say"]),
+    gender: z.enum(["male", "female", "other"]),
     email: z.string().trim().toLowerCase().email("Valid email is required"),
     password: z.string().min(8, "Password must be at least 8 characters")
       .regex(/[A-Z]/, "Password needs an uppercase letter")

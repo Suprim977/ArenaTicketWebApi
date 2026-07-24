@@ -20,8 +20,11 @@ type BackendTournament = {
   description: string;
   date: string;
   location: string;
-  prizePool: number;
-  maxTeams: number;
+  category?: string;
+  imageUrl?: string;
+  status?: string;
+  tiers?: { name: string; price: number; available?: number }[];
+  ticketPrices?: { normal: number; vip: number };
 };
 
 type TournamentList =
@@ -31,22 +34,21 @@ type TournamentList =
       events?: BackendTournament[];
       tournaments?: BackendTournament[];
     };
-type BackendTicket = { _id: string; tournament?: { title?: string } | string; price: number; status: "PENDING" | "CONFIRMED" | "CANCELLED"; createdAt: string };
-
 const toArenaEvent = (tournament: BackendTournament): ArenaEvent => {
   const date = new Date(tournament.date);
   return {
     id: tournament._id,
     title: tournament.title,
-    category: "Festival",
+    category: (tournament.category ?? "Festival") as ArenaEvent["category"],
     venue: tournament.location,
     city: tournament.location,
     date: Number.isNaN(date.valueOf()) ? tournament.date : date.toISOString().slice(0, 10),
     time: Number.isNaN(date.valueOf()) ? "TBA" : date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    priceFrom: tournament.prizePool,
-    seatsLeft: tournament.maxTeams,
-    status: "upcoming",
+    priceFrom: tournament.ticketPrices?.normal ?? Math.min(...(tournament.tiers?.map((tier) => tier.price) ?? [600])),
+    seatsLeft: tournament.tiers?.reduce((sum, tier) => sum + (tier.available ?? 0), 0) ?? 0,
+    status: tournament.status === "sold_out" ? "sold out" : "upcoming",
     description: tournament.description,
+    image: tournament.imageUrl,
   };
 };
 
@@ -80,25 +82,4 @@ export const arenaService = {
   },
   listBookings: (token?: string) => request<Booking[]>(() => axiosInstance.get(API_ENDPOINTS.bookings.list, { headers: authorization(token) })),
   getBookingByRef: (bookingRef: string, token?: string) => request<Booking>(() => axiosInstance.get(API_ENDPOINTS.bookings.byRef(bookingRef), { headers: authorization(token) })),
-  createBooking: async (payload: Pick<Booking, "eventId" | "seatType" | "quantity" | "attendeeName" | "attendeeEmail"> & { price: number }, token?: string): Promise<ArenaResult<Booking>> => {
-    const result = await request<BackendTicket>(() => axiosInstance.post(API_ENDPOINTS.bookings.create, { tournamentId: payload.eventId, price: payload.price }, { headers: authorization(token) }));
-    if (!result.data) return { ok: false, message: result.message };
-
-    return {
-      ok: true,
-      message: result.message,
-      data: {
-        bookingRef: result.data._id,
-        eventId: payload.eventId,
-        eventTitle: typeof result.data.tournament === "object" ? result.data.tournament.title ?? "Tournament ticket" : "Tournament ticket",
-        seatType: payload.seatType,
-        quantity: payload.quantity,
-        totalPrice: result.data.price,
-        attendeeName: payload.attendeeName,
-        attendeeEmail: payload.attendeeEmail,
-        status: result.data.status.toLowerCase() as Booking["status"],
-        createdAt: result.data.createdAt,
-      },
-    };
-  },
 };

@@ -1,6 +1,6 @@
 export type UserRole = "user" | "admin";
 
-export type Gender = "male" | "female" | "other" | "prefer_not_to_say";
+export type Gender = "male" | "female" | "other";
 export type CountryCode = "+977" | "+91" | "+1" | "+44";
 
 export interface User {

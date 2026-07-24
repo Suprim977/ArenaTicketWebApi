@@ -5,12 +5,6 @@ import { useEffect, useState } from "react";
 import { getEventByIdAction } from "@/lib/actions/arena-action";
 import type { ArenaEvent } from "@/types/arena";
 
-const currency = new Intl.NumberFormat("en-NG", {
-  style: "currency",
-  currency: "NGN",
-  maximumFractionDigits: 0,
-});
-
 export default function EventDetailPage({ params }: { params: { eventId: string } }) {
   const [event, setEvent] = useState<ArenaEvent | null>(null);
 
@@ -61,13 +55,13 @@ export default function EventDetailPage({ params }: { params: { eventId: string 
           </div>
           <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800">
             <p className="text-xs uppercase tracking-[0.12em] text-slate-500">From</p>
-            <p className="mt-1 font-semibold text-slate-900 dark:text-white">{currency.format(event.priceFrom)}</p>
+            <p className="mt-1 font-semibold text-slate-900 dark:text-white">Rs {event.priceFrom.toLocaleString("en-NP")}</p>
           </div>
         </div>
 
         <div className="mt-8 flex flex-wrap gap-3">
           <Link href={`/dashboard/booking?eventId=${event.id}`} className="primary-btn">
-            Buy Ticket
+            Book Ticket
           </Link>
           <Link href="/search" className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
             Back to events

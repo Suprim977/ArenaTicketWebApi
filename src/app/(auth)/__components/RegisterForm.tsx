@@ -21,7 +21,7 @@ export default function RegisterForm() {
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } =
     useForm<RegisterSchemaType>({
       resolver: zodResolver(registerSchema),
-      defaultValues: { countryCode: "+977", gender: "prefer_not_to_say" },
+      defaultValues: { countryCode: "+977", gender: "other" },
     });
 
   const onSubmit = async (values: RegisterSchemaType) => {
@@ -62,7 +62,7 @@ export default function RegisterForm() {
           <div><label className="label-mini" htmlFor="countryCode">Country code</label><select id="countryCode" className="input-shell mt-1" {...register("countryCode")}><option value="+977">Nepal (+977)</option><option value="+91">India (+91)</option><option value="+1">United States (+1)</option><option value="+44">United Kingdom (+44)</option></select></div>
           <div><label className="label-mini" htmlFor="phoneNumber">Phone number</label><input id="phoneNumber" inputMode="numeric" autoComplete="tel-national" className="input-shell mt-1" placeholder="98XXXXXXXX" {...register("phoneNumber")} /><ErrorText message={errors.phoneNumber?.message} /></div>
         </div>
-        <div><label className="label-mini" htmlFor="gender">Gender</label><select id="gender" className="input-shell mt-1" {...register("gender")}><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option><option value="prefer_not_to_say">Prefer not to say</option></select></div>
+        <div><label className="label-mini" htmlFor="gender">Gender</label><select id="gender" className="input-shell mt-1" {...register("gender")}><option value="male">Male</option><option value="female">Female</option><option value="other">Other / prefer not to say</option></select></div>
         <div><label className="label-mini" htmlFor="email">Email</label><input id="email" autoComplete="email" className="input-shell mt-1" type="email" placeholder="example@email.com" {...register("email")} /><ErrorText message={errors.email?.message} /></div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div><label className="label-mini" htmlFor="password">Password</label><div className="relative"><input id="password" autoComplete="new-password" className="input-shell mt-1 pr-11" type={showPassword ? "text" : "password"} placeholder="Password@123" {...register("password")} /><button type="button" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword((value) => !value)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500">{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></div><ErrorText message={errors.password?.message} /></div>

@@ -9,7 +9,7 @@ import type { Ticket } from "@/types/ticket";
 import type { User } from "@/types/user";
 import { profileService } from "@/services/profile.service";
 
-type ListPayload<T> = T[] | { data: T[]; events?: T[]; bookings?: T[]; tickets?: T[] };
+type ListPayload<T> = T[] | { data?: T[]; events?: T[]; bookings?: T[]; tickets?: T[]; users?: T[]; payments?: T[] };
 type ItemPayload<T> = T | { event?: T; booking?: T; payment?: T };
 
 const unwrap = <T>(payload: T | ApiEnvelope<T>): T => {
@@ -22,7 +22,7 @@ const unwrap = <T>(payload: T | ApiEnvelope<T>): T => {
 const unwrapList = <T>(payload: ListPayload<T> | ApiEnvelope<ListPayload<T>>): T[] => {
   const value = unwrap(payload);
   if (Array.isArray(value)) return value;
-  return value.events ?? value.bookings ?? value.tickets ?? value.data ?? [];
+  return value.events ?? value.bookings ?? value.tickets ?? value.users ?? value.payments ?? value.data ?? [];
 };
 
 const unwrapItem = <T>(payload: ItemPayload<T> | ApiEnvelope<ItemPayload<T>>): T => {
@@ -47,35 +47,42 @@ type BackendBooking = Booking & {
 
 export type AdminEventPayload = {
   title: string;
+  slug: string;
   description: string;
+  category: string;
   date: string;
-  startTime: string;
-  venue: string;
-  stadium: string;
-  image?: File;
+  time: string;
+  location: string;
+  imageUrl: string;
+  prizePool: number;
+  format: string;
   normalPrice: number;
   vipPrice: number;
-  normalAvailability: number;
-  vipAvailability: number;
-  active: boolean;
+  normalCapacity: number;
+  vipCapacity: number;
+  availability: boolean;
 };
 
-const eventFormData = (payload: AdminEventPayload) => {
-  const formData = new FormData();
-  formData.append("title", payload.title);
-  formData.append("description", payload.description);
-  formData.append("date", payload.date);
-  formData.append("startTime", payload.startTime);
-  formData.append("venue", payload.venue);
-  formData.append("stadium", payload.stadium);
-  formData.append("active", String(payload.active));
-  formData.append("tiers", JSON.stringify([
-    { name: "Normal", price: payload.normalPrice, available: payload.normalAvailability },
-    { name: "VIP", price: payload.vipPrice, available: payload.vipAvailability },
-  ]));
-  if (payload.image) formData.append("image", payload.image);
-  return formData;
-};
+const eventRequest = (payload: AdminEventPayload) => ({
+  title: payload.title,
+  slug: payload.slug,
+  description: payload.description,
+  category: payload.category,
+  date: new Date(`${payload.date}T${payload.time}`).toISOString(),
+  time: payload.time,
+  location: payload.location,
+  imageUrl: payload.imageUrl,
+  status: "published" as const,
+  availability: payload.availability,
+  ticketPrices: { normal: payload.normalPrice, vip: payload.vipPrice },
+  prizePool: payload.prizePool,
+  format: payload.format,
+  tiers: [
+    { name: "Standard", price: payload.normalPrice, capacity: payload.normalCapacity, available: payload.normalCapacity },
+    { name: "VIP", price: payload.vipPrice, capacity: payload.vipCapacity, available: payload.vipCapacity },
+  ],
+  relatedEvents: [],
+});
 
 const normalizeEvent = (event: BackendEvent): Event => {
   const eventTime = new Date(event.date).getTime();
@@ -86,9 +93,9 @@ const normalizeEvent = (event: BackendEvent): Event => {
     ...event,
     venue: event.venue || event.location || "Venue TBA",
     image: event.image || event.imageUrl,
-    startTime: event.startTime || event.time,
+    startTime: event.startTime || event.time || (event.date ? new Date(event.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : undefined),
     status: event.status || (Number.isNaN(eventTime) || eventTime >= Date.now() ? "upcoming" : "completed"),
-    priceFrom: event.priceFrom ?? lowestTierPrice ?? 0,
+    priceFrom: event.priceFrom ?? event.ticketPrices?.normal ?? lowestTierPrice ?? 0,
     seatsLeft: event.seatsLeft ?? event.tiers?.reduce((total, tier) => total + (tier.available ?? 0), 0),
   };
 };
@@ -121,23 +128,27 @@ export const dashboardApi = {
     unwrap<InitiatePaymentResult>((await axiosInstance.post(API_ENDPOINTS.payments.initiate, payload)).data),
   updateMe: profileService.updateProfile,
   updatePassword: async (payload: { currentPassword: string; newPassword: string }) =>
-    axiosInstance.put(API_ENDPOINTS.auth.password, payload),
+    axiosInstance.patch(API_ENDPOINTS.auth.password, payload),
+  getAdminDashboard: async () =>
+    unwrap<{ totalUsers: number; totalEvents: number; totalBookings: number; ticketsSold: number; totalRevenue: number }>(
+      (await axiosInstance.get(API_ENDPOINTS.adminDashboard)).data,
+    ),
   getAdminUsers: async () =>
     unwrapList<User>((await axiosInstance.get(API_ENDPOINTS.adminUsers.list)).data),
   getAdminEvents: async () =>
-    unwrapList<BackendEvent>((await axiosInstance.get(API_ENDPOINTS.adminEvents.list)).data).map(normalizeEvent),
+    unwrapList<BackendEvent>((await axiosInstance.get(API_ENDPOINTS.events.list, { params: { limit: 100 } })).data).map(normalizeEvent),
   getAdminEvent: async (id: string) =>
-    normalizeEvent(unwrapItem<BackendEvent>((await axiosInstance.get(API_ENDPOINTS.adminEvents.byId(id))).data)),
+    normalizeEvent(unwrapItem<BackendEvent>((await axiosInstance.get(API_ENDPOINTS.events.byId(id))).data)),
   createAdminEvent: async (payload: AdminEventPayload) =>
-    normalizeEvent(unwrapItem<BackendEvent>((await axiosInstance.post(API_ENDPOINTS.adminEvents.list, eventFormData(payload))).data)),
+    normalizeEvent(unwrapItem<BackendEvent>((await axiosInstance.post(API_ENDPOINTS.events.list, eventRequest(payload))).data)),
   updateAdminEvent: async (id: string, payload: AdminEventPayload) =>
-    normalizeEvent(unwrapItem<BackendEvent>((await axiosInstance.patch(API_ENDPOINTS.adminEvents.byId(id), eventFormData(payload))).data)),
+    normalizeEvent(unwrapItem<BackendEvent>((await axiosInstance.patch(API_ENDPOINTS.events.byId(id), eventRequest(payload))).data)),
   getAdminBookings: async () =>
     unwrapList<Booking>((await axiosInstance.get(API_ENDPOINTS.adminBookings.list)).data),
   getAdminPayments: async () =>
     unwrapList<Payment>((await axiosInstance.get(API_ENDPOINTS.adminPayments.list)).data),
   getAdminTickets: async () =>
-    unwrapList<Booking>((await axiosInstance.get(API_ENDPOINTS.adminTickets.list)).data),
+    unwrapList<Ticket>((await axiosInstance.get(API_ENDPOINTS.adminTickets.list)).data),
   deleteAdminUser: async (id: string) => axiosInstance.delete(API_ENDPOINTS.adminUsers.byId(id)),
-  deleteAdminEvent: async (id: string) => axiosInstance.delete(API_ENDPOINTS.adminEvents.byId(id)),
+  deleteAdminEvent: async (id: string) => axiosInstance.delete(API_ENDPOINTS.events.byId(id)),
 };

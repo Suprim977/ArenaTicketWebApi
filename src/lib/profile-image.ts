@@ -1,4 +1,4 @@
-const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1";
+const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8089/api/v1";
 
 export const BACKEND_ORIGIN =
   process.env.NEXT_PUBLIC_BACKEND_URL ??
@@ -6,7 +6,7 @@ export const BACKEND_ORIGIN =
     try {
       return new URL(apiUrl).origin;
     } catch {
-      return "http://localhost:5000";
+      return "http://localhost:8089";
     }
   })();
 
