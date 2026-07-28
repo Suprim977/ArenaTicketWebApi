@@ -8,7 +8,7 @@ import type { InitiatePaymentPayload, InitiatePaymentResult, Payment } from "@/t
 import type { Ticket } from "@/types/ticket";
 import type { User } from "@/types/user";
 import { profileService } from "@/services/profile.service";
-import { getMediaUrl, normalizeMediaPath } from "@/lib/media-url";
+import { normalizeMediaPath } from "@/lib/media-url";
 
 type ListPayload<T> = T[] | { data?: T[]; events?: T[]; bookings?: T[]; tickets?: T[]; users?: T[]; payments?: T[] };
 type ItemPayload<T> = T | { event?: T; booking?: T; payment?: T };
@@ -54,7 +54,6 @@ export type AdminEventPayload = {
   date: string;
   time: string;
   location: string;
-  imageUrl: string;
   prizePool: number;
   format: string;
   normalPrice: number;
@@ -64,26 +63,31 @@ export type AdminEventPayload = {
   availability: boolean;
 };
 
-const eventRequest = (payload: AdminEventPayload) => ({
-  title: payload.title,
-  slug: payload.slug,
-  description: payload.description,
-  category: payload.category,
-  date: new Date(`${payload.date}T${payload.time}`).toISOString(),
-  time: payload.time,
-  location: payload.location,
-  imageUrl: payload.imageUrl,
-  status: "published" as const,
-  availability: payload.availability,
-  ticketPrices: { normal: payload.normalPrice, vip: payload.vipPrice },
-  prizePool: payload.prizePool,
-  format: payload.format,
-  tiers: [
+const eventFormData = (payload: AdminEventPayload, eventImage?: File): FormData => {
+  const formData = new FormData();
+  const tiers = [
     { name: "Standard", price: payload.normalPrice, capacity: payload.normalCapacity, available: payload.normalCapacity },
     { name: "VIP", price: payload.vipPrice, capacity: payload.vipCapacity, available: payload.vipCapacity },
-  ],
-  relatedEvents: [],
-});
+  ];
+
+  formData.append("title", payload.title);
+  formData.append("slug", payload.slug);
+  formData.append("description", payload.description);
+  formData.append("category", payload.category);
+  formData.append("date", new Date(`${payload.date}T${payload.time}`).toISOString());
+  formData.append("time", payload.time);
+  formData.append("location", payload.location);
+  formData.append("status", "published");
+  formData.append("availability", String(payload.availability));
+  formData.append("ticketPrices", JSON.stringify({ normal: payload.normalPrice, vip: payload.vipPrice }));
+  formData.append("prizePool", String(payload.prizePool));
+  formData.append("format", payload.format);
+  formData.append("tiers", JSON.stringify(tiers));
+  formData.append("relatedEvents", JSON.stringify([]));
+  if (eventImage) formData.append("eventImage", eventImage);
+
+  return formData;
+};
 
 const normalizeEvent = (event: BackendEvent): Event => {
   const eventTime = new Date(event.date).getTime();
@@ -93,8 +97,7 @@ const normalizeEvent = (event: BackendEvent): Event => {
   return {
     ...event,
     venue: event.venue || event.location || "Venue TBA",
-    image: getMediaUrl(event.image || event.imageUrl) ?? undefined,
-    imageUrl: normalizeMediaPath(event.imageUrl ?? event.image) ?? undefined,
+    imageUrl: normalizeMediaPath(event.imageUrl) ?? undefined,
     startTime: event.startTime || event.time || (event.date ? new Date(event.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : undefined),
     status: event.status || (Number.isNaN(eventTime) || eventTime >= Date.now() ? "upcoming" : "completed"),
     priceFrom: event.priceFrom ?? event.ticketPrices?.normal ?? lowestTierPrice ?? 0,
@@ -128,14 +131,6 @@ export const dashboardApi = {
     normalizeBooking(unwrapItem<BackendBooking>((await axiosInstance.post(API_ENDPOINTS.bookings.create, payload)).data)),
   initiatePayment: async (payload: InitiatePaymentPayload) =>
     unwrap<InitiatePaymentResult>((await axiosInstance.post(API_ENDPOINTS.payments.initiate, payload)).data),
-  uploadEventImage: async (file: File) => {
-    const formData = new FormData();
-    formData.append("banner", file);
-    const uploaded = unwrap<{ fileUrl: string }>((await axiosInstance.post(API_ENDPOINTS.uploads.eventBanner, formData)).data);
-    const publicPath = normalizeMediaPath(uploaded.fileUrl);
-    if (!publicPath) throw new Error("Event image upload failed.");
-    return publicPath;
-  },
   updateMe: profileService.updateProfile,
   updatePassword: async (payload: { currentPassword: string; newPassword: string }) =>
     axiosInstance.patch(API_ENDPOINTS.auth.password, payload),
@@ -149,10 +144,18 @@ export const dashboardApi = {
     unwrapList<BackendEvent>((await axiosInstance.get(API_ENDPOINTS.events.list, { params: { limit: 100 } })).data).map(normalizeEvent),
   getAdminEvent: async (id: string) =>
     normalizeEvent(unwrapItem<BackendEvent>((await axiosInstance.get(API_ENDPOINTS.events.byId(id))).data)),
-  createAdminEvent: async (payload: AdminEventPayload) =>
-    normalizeEvent(unwrapItem<BackendEvent>((await axiosInstance.post(API_ENDPOINTS.events.list, eventRequest(payload))).data)),
-  updateAdminEvent: async (id: string, payload: AdminEventPayload) =>
-    normalizeEvent(unwrapItem<BackendEvent>((await axiosInstance.patch(API_ENDPOINTS.events.byId(id), eventRequest(payload))).data)),
+  createAdminEvent: async (payload: AdminEventPayload, eventImage?: File) => {
+    if (!eventImage) throw new Error("Event image is required.");
+    return normalizeEvent(unwrapItem<BackendEvent>((await axiosInstance.post(
+      API_ENDPOINTS.events.list,
+      eventFormData(payload, eventImage),
+    )).data));
+  },
+  updateAdminEvent: async (id: string, payload: AdminEventPayload, eventImage?: File) =>
+    normalizeEvent(unwrapItem<BackendEvent>((await axiosInstance.patch(
+      API_ENDPOINTS.events.byId(id),
+      eventFormData(payload, eventImage),
+    )).data)),
   getAdminBookings: async () =>
     unwrapList<BackendBooking>((await axiosInstance.get(API_ENDPOINTS.adminBookings.list)).data).map(normalizeBooking),
   getAdminPayments: async () =>

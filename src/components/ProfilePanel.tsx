@@ -90,7 +90,7 @@ export default function ProfilePanel() {
       toast.success("Profile photo uploaded successfully.");
     },
     onError: (error) => {
-      const message = getApiErrorMessage(error, "Profile photo could not be uploaded.");
+      const message = getApiErrorMessage(error, "Profile image upload failed.");
       setUploadProgress(0);
       setPhotoError(message);
       toast.error(message);

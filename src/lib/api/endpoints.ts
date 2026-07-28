@@ -4,7 +4,7 @@ export const API_ENDPOINTS = {
   auth: {
     login: "/auth/login",
     register: "/auth/register",
-    forgotPassword: "/auth/forgot-password",
+    forgotPassword: "/auth/request-password-reset",
     resetPassword: "/auth/reset-password",
     whoami: "/users/profile",
     update: "/users/profile",
@@ -43,5 +43,4 @@ export const API_ENDPOINTS = {
     photo: "/users/profile/photo",
   },
   payments: { initiate: "/payments/initiate" },
-  uploads: { eventBanner: "/upload/tournament-banner" },
 } as const;

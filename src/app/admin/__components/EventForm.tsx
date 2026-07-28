@@ -21,7 +21,6 @@ const schema = z.object({
   date: z.string().min(1, "Date is required"),
   time: z.string().min(1, "Time is required"),
   location: z.string().trim().min(2, "Venue is required"),
-  imageUrl: z.string(),
   format: z.string().trim().min(2, "Format is required"),
   prizePool: z.coerce.number().min(0),
   normalPrice: z.coerce.number().positive(),
@@ -33,16 +32,20 @@ const schema = z.object({
 
 type Input = z.input<typeof schema>;
 type Values = z.infer<typeof schema>;
-type Props = { initialEvent?: Event; submitLabel: string; onSubmit: (payload: AdminEventPayload) => Promise<Event>; onUploadImage: (file: File) => Promise<string> };
+type Props = {
+  initialEvent?: Event;
+  submitLabel: string;
+  onSubmit: (payload: AdminEventPayload, eventImage?: File) => Promise<Event>;
+};
 
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
-export default function EventForm({ initialEvent, submitLabel, onSubmit, onUploadImage }: Props) {
+export default function EventForm({ initialEvent, submitLabel, onSubmit }: Props) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(getMediaUrl(initialEvent?.imageUrl ?? initialEvent?.image));
+  const [previewUrl, setPreviewUrl] = useState<string | null>(getMediaUrl(initialEvent?.imageUrl));
   const [imageError, setImageError] = useState("");
   const normal = initialEvent?.tiers?.find((tier) => /^(normal|standard)$/i.test(tier.name));
   const vip = initialEvent?.tiers?.find((tier) => /^vip$/i.test(tier.name));
@@ -56,7 +59,6 @@ export default function EventForm({ initialEvent, submitLabel, onSubmit, onUploa
       date: initialEvent?.date?.slice(0, 10) ?? "",
       time: initialEvent?.time ?? initialEvent?.startTime ?? "",
       location: initialEvent?.location ?? initialEvent?.venue ?? "",
-      imageUrl: initialEvent?.imageUrl ?? initialEvent?.image ?? "",
       format: initialEvent?.format ?? "",
       prizePool: initialEvent?.prizePool ?? 0,
       normalPrice: initialEvent?.ticketPrices?.normal ?? normal?.price ?? 600,
@@ -92,13 +94,11 @@ export default function EventForm({ initialEvent, submitLabel, onSubmit, onUploa
 
   const submit = async (values: Values) => {
     try {
-      let imageUrl = values.imageUrl;
-      if (imageFile) imageUrl = await onUploadImage(imageFile);
-      if (!imageUrl) {
+      if (!initialEvent && !imageFile) {
         setImageError("Event image is required.");
         return;
       }
-      await onSubmit({ ...values, imageUrl });
+      await onSubmit(values, imageFile ?? undefined);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["events"] }),
         queryClient.invalidateQueries({ queryKey: ["admin-events"] }),
@@ -132,7 +132,6 @@ export default function EventForm({ initialEvent, submitLabel, onSubmit, onUploa
         <label className="text-sm font-semibold">Venue<input className="input-shell mt-2" {...register("location")} />{fieldError("location")}</label>
         <label className="text-sm font-semibold">Date<input className="input-shell mt-2" type="date" {...register("date")} />{fieldError("date")}</label>
         <label className="text-sm font-semibold">Time<input className="input-shell mt-2" type="time" {...register("time")} />{fieldError("time")}</label>
-        <input type="hidden" {...register("imageUrl")} />
         <label className="text-sm font-semibold">Tournament format<input className="input-shell mt-2" placeholder="Double Elimination • Best of 3" {...register("format")} />{fieldError("format")}</label>
         <label className="text-sm font-semibold">Prize pool (Rs)<input className="input-shell mt-2" type="number" min={0} {...register("prizePool")} />{fieldError("prizePool")}</label>
       </div>

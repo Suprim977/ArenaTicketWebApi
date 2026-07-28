@@ -32,7 +32,7 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error: AxiosError<ApiErrorResponse>) => {
     // Handle 401 Unauthorized (expired/invalid token)
-    const isPublicAuthRequest = ["/auth/login", "/auth/register", "/auth/forgot-password", "/auth/reset-password"]
+    const isPublicAuthRequest = ["/auth/login", "/auth/register", "/auth/request-password-reset", "/auth/forgot-password", "/auth/reset-password"]
       .some((path) => error.config?.url?.includes(path));
     if (error.response?.status === 401 && !isPublicAuthRequest) {
       if (typeof window !== "undefined") {

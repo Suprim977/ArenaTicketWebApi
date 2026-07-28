@@ -21,13 +21,12 @@ export interface Event {
   city?: string;
   date: string;
   startTime?: string;
-  image?: string;
+  imageUrl?: string;
   status: EventStatus;
   priceFrom?: number;
   seatsLeft?: number;
   tiers?: TicketTier[];
   ticketPrices?: { normal: number; vip: number };
-  imageUrl?: string;
   location?: string;
   time?: string;
   slug?: string;

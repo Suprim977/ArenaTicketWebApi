@@ -1,0 +1,32 @@
+
+> web-arenaticket@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.11 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.18.3:3000
+- Environments: .env.local
+✓ Ready in 713ms
+Creating turbopack project { dir: 'C:\\Users\\acer\\Desktop\\web-arenaticket', testMode: true }
+
+▲ Next.js 16.2.11 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.18.3:3000
+- Environments: .env.local
+✓ Ready in 783ms
+Creating turbopack project { dir: 'C:\\Users\\acer\\Desktop\\web-arenaticket', testMode: true }
+
+ GET / 200 in 512ms (next.js: 202ms, application-code: 309ms)
+ GET /login 200 in 260ms (next.js: 75ms, application-code: 185ms)
+ GET / 200 in 69ms (next.js: 4ms, application-code: 65ms)
+ GET /search 200 in 46ms (next.js: 31ms, application-code: 15ms)
+ POST /search 200 in 58ms (next.js: 3ms, application-code: 55ms)
+  └─ ƒ getEventsAction() in 36ms src/lib/actions/arena-action.ts
+ POST /search 200 in 22ms (next.js: 2ms, application-code: 20ms)
+  └─ ƒ getEventsAction() in 13ms src/lib/actions/arena-action.ts
+✓ Compiled in 279ms
+ GET / 200 in 90ms (next.js: 41ms, application-code: 49ms)
+✓ Compiled in 57ms
+ GET / 200 in 253ms (next.js: 33ms, application-code: 219ms)
+ GET / 200 in 73ms (next.js: 4ms, application-code: 68ms)
+[?25h

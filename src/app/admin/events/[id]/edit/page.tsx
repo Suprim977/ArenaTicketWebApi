@@ -17,7 +17,7 @@ export default function EditEventPage() {
   return (
     <section className="mx-auto max-w-4xl space-y-5">
       <header><p className="label-mini">Events</p><h1 className="mt-2 text-3xl font-black">Edit event</h1></header>
-      <EventForm initialEvent={event.data} submitLabel="Save Changes" onSubmit={(payload) => dashboardApi.updateAdminEvent(id, payload)} onUploadImage={dashboardApi.uploadEventImage} />
+      <EventForm initialEvent={event.data} submitLabel="Save Changes" onSubmit={(payload, eventImage) => dashboardApi.updateAdminEvent(id, payload, eventImage)} />
     </section>
   );
 }

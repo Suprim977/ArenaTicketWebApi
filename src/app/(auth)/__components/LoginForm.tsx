@@ -59,7 +59,7 @@ export default function LoginForm() {
             </button>
           </div>
           {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>}
-          <div className="mt-2 text-right"><Link href="/forgot-password" className="text-sm font-semibold text-indigo-600 transition hover:text-indigo-500">Forgot password?</Link></div>
+          <div className="mt-2 text-right"><Link href="/request-password-reset" className="text-sm font-semibold text-indigo-600 transition hover:text-indigo-500">Forgot password?</Link></div>
         </div>
         {apiError && <p role="alert" aria-live="polite" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-950/40 dark:text-red-300">{apiError}</p>}
         <button type="submit" disabled={isSubmitting} className="primary-btn w-full">{isSubmitting ? "Signing you in..." : "Sign In"}</button>

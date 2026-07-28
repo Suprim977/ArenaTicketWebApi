@@ -11,16 +11,17 @@ export const BACKEND_ORIGIN =
   })();
 
 export const normalizeMediaPath = (path?: string | null): string | null => {
-  if (!path) return null;
-  if (/^(?:https?:|blob:|data:)/i.test(path)) return path;
-  const normalized = path.replace(/\\/g, "/").replace(/^\/?src\/uploads\//i, "/uploads/");
+  const value = path?.trim();
+  if (!value || /^blob:/i.test(value)) return null;
+  if (/^(?:https?:|data:)/i.test(value)) return value;
+  const normalized = value.replace(/\\/g, "/").replace(/^\/?src\/uploads\//i, "/uploads/");
   return normalized.startsWith("/") ? normalized : `/${normalized}`;
 };
 
 export const getMediaUrl = (path?: string | null, cacheKey?: string): string | null => {
   const normalized = normalizeMediaPath(path);
   if (!normalized) return null;
-  const url = /^(?:https?:|blob:|data:)/i.test(normalized)
+  const url = /^(?:https?:|data:)/i.test(normalized)
     ? normalized
     : `${BACKEND_ORIGIN}${normalized}`;
   return cacheKey ? `${url}${url.includes("?") ? "&" : "?"}v=${encodeURIComponent(cacheKey)}` : url;

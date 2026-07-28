@@ -6,6 +6,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import DeleteModal from "@/app/admin/__components/DeleteModal";
 import DashboardSkeleton from "@/components/DashboardSkeleton";
+import EventImage from "@/components/EventImage";
 import { dashboardApi } from "@/lib/api/dashboard-api";
 import { getApiErrorMessage } from "@/lib/api/error-message";
 
@@ -34,12 +35,12 @@ export default function AdminEventsPage() {
       {events.data && (
         <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <table className="min-w-full text-left text-sm">
-            <thead className="bg-slate-50 text-xs uppercase tracking-wider text-slate-500 dark:bg-slate-800"><tr><th className="px-4 py-3">Event</th><th className="px-4 py-3">Date</th><th className="px-4 py-3">Normal</th><th className="px-4 py-3">VIP</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Actions</th></tr></thead>
+            <thead className="bg-slate-50 text-xs uppercase tracking-wider text-slate-500 dark:bg-slate-800"><tr><th className="px-4 py-3">Banner</th><th className="px-4 py-3">Event</th><th className="px-4 py-3">Date</th><th className="px-4 py-3">Normal</th><th className="px-4 py-3">VIP</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Actions</th></tr></thead>
             <tbody>{events.data.map((event) => {
               const id = event._id || event.id || "";
               const normal = event.tiers?.find((tier) => /^(normal|standard)$/i.test(tier.name));
               const vip = event.tiers?.find((tier) => tier.name.toLowerCase() === "vip");
-              return <tr key={id} className="border-t border-slate-100 dark:border-slate-800"><td className="px-4 py-4"><p className="font-bold">{event.title}</p><p className="text-xs text-slate-500">{event.venue}</p></td><td className="px-4 py-4">{new Date(event.date).toLocaleDateString()}</td><td className="px-4 py-4">Rs {(normal?.price ?? 0).toLocaleString("en-NP")}</td><td className="px-4 py-4">Rs {(vip?.price ?? 0).toLocaleString("en-NP")}</td><td className="px-4 py-4 capitalize">{event.active === false ? "inactive" : event.status}</td><td className="px-4 py-4"><div className="flex gap-3"><Link href={`/event/${id}`} className="font-semibold text-slate-600">View</Link><Link href={`/admin/events/${id}/edit`} className="font-semibold text-indigo-600">Edit</Link><button onClick={() => setDeleteId(id)} className="font-semibold text-rose-600">Delete</button></div></td></tr>;
+              return <tr key={id} className="border-t border-slate-100 dark:border-slate-800"><td className="px-4 py-4"><div className="relative h-14 w-24 overflow-hidden rounded-lg"><EventImage src={event.imageUrl} alt={`${event.title} banner`} sizes="96px" /></div></td><td className="px-4 py-4"><p className="font-bold">{event.title}</p><p className="text-xs text-slate-500">{event.venue}</p></td><td className="px-4 py-4">{new Date(event.date).toLocaleDateString()}</td><td className="px-4 py-4">Rs {(normal?.price ?? 0).toLocaleString("en-NP")}</td><td className="px-4 py-4">Rs {(vip?.price ?? 0).toLocaleString("en-NP")}</td><td className="px-4 py-4 capitalize">{event.active === false ? "inactive" : event.status}</td><td className="px-4 py-4"><div className="flex gap-3"><Link href={`/event/${id}`} className="font-semibold text-slate-600">View</Link><Link href={`/admin/events/${id}/edit`} className="font-semibold text-indigo-600">Edit</Link><button onClick={() => setDeleteId(id)} className="font-semibold text-rose-600">Delete</button></div></td></tr>;
             })}</tbody>
           </table>
           {!events.data.length && <p className="p-8 text-center text-slate-500">No events found.</p>}

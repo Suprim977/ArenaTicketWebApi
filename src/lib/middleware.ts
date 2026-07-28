@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const authPages = ["/login", "/register", "/forgot-password", "/reset-password"];
+const authPages = ["/login", "/register", "/request-password-reset", "/reset-password"];
 const protectedPaths = ["/admin", "/dashboard", "/profile", "/bookings", "/tickets", "/booking", "/ticket", "/payment"];
 
 export const authRedirectMiddleware = (request: NextRequest): NextResponse => {

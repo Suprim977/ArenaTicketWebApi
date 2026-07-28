@@ -1,54 +1,56 @@
-"use server";
+'use server';
 
-import { cookies } from "next/headers";
-import { authService } from "@/services/auth.service";
-import type { ActionResult, AuthPayload, AuthResponse, ForgotPasswordPayload, RegisterPayload, ResetPasswordPayload, UpdatePasswordPayload } from "@/types/auth";
+import { authService } from '@/services/auth.service';
+import type { AuthPayload, RegisterPayload, ResetPasswordPayload } from '@/types/auth';
 
-const getAuthToken = async (): Promise<string | undefined> => (await cookies()).get("token")?.value;
-
-const persistSession = async (result: ActionResult<AuthResponse>) => {
-  if (!result.ok || !result.data?.token) return;
-
-  const cookieStore = await cookies();
-  const options = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
-    maxAge: 60 * 60 * 24 * 7,
-    path: "/",
-  };
-  cookieStore.set("token", result.data.token, options);
-  cookieStore.set("user_role", result.data.user.role, { ...options, httpOnly: false });
+export const handleRequestPasswordReset = async (email: string | { email: string }) => {
+  try {
+    const normalizedEmail = typeof email === 'string' ? email : email.email;
+    const response = await authService.forgotPassword({ email: normalizedEmail });
+    return { ok: true, success: true, message: response.message || 'Password reset email sent successfully' };
+  } catch (error: any) {
+    return { ok: false, success: false, message: error?.response?.data?.message || 'Request password reset failed' };
+  }
 };
 
-export const loginAction = async (payload: AuthPayload): Promise<ActionResult<AuthResponse>> => {
+export const handleResetPassword = async (
+  token: string | { token: string; password?: string; newPassword?: string; confirmPassword?: string },
+  newPassword?: string
+) => {
   try {
-    const result = await authService.login({
-      email: payload.email.trim().toLowerCase(),
-      password: payload.password,
+    const normalizedToken = typeof token === 'string' ? token : token.token;
+    const password =
+      typeof token === 'string'
+        ? (newPassword ?? '')
+        : (token.password ?? token.newPassword ?? '');
+    const response = await authService.resetPassword({
+      token: normalizedToken,
+      password,
+      confirmPassword: password,
     });
-    await persistSession(result);
-    return result;
-  } catch (error) {
-    console.error("[loginAction] Unexpected login error", error);
-    return { ok: false, message: error instanceof Error ? error.message : "Unable to sign in right now. Please try again." };
+    return { ok: true, success: true, message: response.message || 'Password has been reset successfully' };
+  } catch (error: any) {
+    return { ok: false, success: false, message: error?.response?.data?.message || 'Reset password failed' };
   }
+};
+
+export const forgotPasswordAction = handleRequestPasswordReset;
+export const resetPasswordAction = handleResetPassword;
+
+export const loginAction = async (payload: AuthPayload) => {
+  const response = await authService.login(payload);
+  return {
+    ok: response.ok,
+    message: response.message,
+    data: response.data,
+  };
 };
 
 export const registerAction = async (payload: RegisterPayload) => {
-  try {
-    return await authService.register(payload);
-  } catch (error) {
-    return { ok: false, message: error instanceof Error ? error.message : "Unable to register right now. Please try again." };
-  }
+  const response = await authService.register(payload);
+  return {
+    ok: response.ok,
+    message: response.message,
+    data: response.data,
+  };
 };
-
-export const forgotPasswordAction = async (payload: ForgotPasswordPayload) => authService.forgotPassword(payload);
-
-export const resetPasswordAction = async (payload: ResetPasswordPayload) => authService.resetPassword(payload);
-
-export const whoAmIAction = async () => authService.whoAmI(await getAuthToken());
-
-export const updateProfileAction = async (formData: FormData) => authService.updateProfile(formData, await getAuthToken());
-
-export const updatePasswordAction = async (payload: UpdatePasswordPayload) => authService.updatePassword(payload, await getAuthToken());

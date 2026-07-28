@@ -1,6 +1,6 @@
 import { CalendarDays, MapPin } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import EventImage from "@/components/EventImage";
 import { formatDate, formatMoney } from "@/lib/format";
 import type { ArenaEvent } from "@/types/arena";
 
@@ -8,7 +8,7 @@ export default function EventCard({ event }: { event: ArenaEvent }) {
   return (
     <article className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-card transition hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900">
       <div className="relative h-48 bg-slate-100 dark:bg-slate-800">
-        {event.image ? <Image src={event.image} alt="" fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" /> : <div className="flex h-full items-center justify-center text-sm text-slate-400">ArenaTicket Event</div>}
+        <EventImage src={event.image} alt={`${event.title} banner`} />
       </div>
       <div className="p-5">
         <div className="flex items-start justify-between gap-3">
