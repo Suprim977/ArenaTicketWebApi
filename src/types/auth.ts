@@ -22,6 +22,16 @@ export type AuthPayload = {
   password: string;
 };
 
+export type AdminRegisterPayload = {
+  fullName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  adminRegistrationCode: string;
+};
+
+export type AdminLoginPayload = AuthPayload;
+
 export type RegisterPayload = AuthPayload & {
   firstName: string;
   lastName: string;
@@ -56,3 +66,23 @@ export type AuthResponse = {
   token: string;
   user: AuthUser;
 };
+
+export interface AdminRegisterRequest {
+  fullName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  adminRegistrationCode: string;
+}
+
+export interface AdminLoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface AuthenticatedUser {
+  id: string;
+  fullName: string;
+  email: string;
+  role: "user" | "admin";
+}

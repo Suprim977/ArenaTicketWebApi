@@ -4,6 +4,8 @@ export const API_ENDPOINTS = {
   auth: {
     login: "/auth/login",
     register: "/auth/register",
+    adminLogin: "/auth/admin/login",
+    adminRegister: "/auth/admin/register",
     forgotPassword: "/auth/request-password-reset",
     resetPassword: "/auth/reset-password",
     whoami: "/users/profile",

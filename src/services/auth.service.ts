@@ -1,7 +1,7 @@
 import { axiosInstance, type ApiResponse } from "@/lib/api/axios-instance";
 import { API_ENDPOINTS } from "@/lib/api/endpoints";
 import { getApiErrorMessage } from "@/lib/api/error-message";
-import type { ActionResult, AuthPayload, AuthResponse, AuthUser, ForgotPasswordPayload, RegisterPayload, ResetPasswordPayload, UpdatePasswordPayload } from "@/types/auth";
+import type { ActionResult, AdminLoginRequest, AdminRegisterRequest, AuthPayload, AuthResponse, AuthUser, AuthenticatedUser, ForgotPasswordPayload, RegisterPayload, ResetPasswordPayload, UpdatePasswordPayload } from "@/types/auth";
 
 const authorization = (token?: string) => (token ? { Authorization: `Bearer ${token}` } : undefined);
 
@@ -52,8 +52,35 @@ const authRequest = async (operation: () => Promise<ApiResponse<BackendAuthRespo
   return result.data ? { ok: true, message: result.message, data: normalizeAuthResponse(result.data) } : { ok: false, message: result.message };
 };
 
+type AdminAuthResponse = {
+  user: AuthenticatedUser | { id: string; fullName: string; email: string; role: "user" | "admin" };
+  token?: string;
+};
+
+const normalizeAdminUser = (user: AdminAuthResponse["user"]): AuthenticatedUser => ({
+  id: user.id,
+  fullName: user.fullName,
+  email: user.email,
+  role: user.role,
+});
+
+const adminAuthRequest = async (operation: () => Promise<ApiResponse<AdminAuthResponse>>): Promise<ActionResult<{ token?: string; user: AuthenticatedUser }>> => {
+  const result = await request(operation);
+  if (!result.data) return { ok: false, message: result.message };
+  return {
+    ok: true,
+    message: result.message,
+    data: {
+      token: result.data.token,
+      user: normalizeAdminUser(result.data.user),
+    },
+  };
+};
+
 export const authService = {
   login: (payload: AuthPayload) => authRequest(() => axiosInstance.post(API_ENDPOINTS.auth.login, payload)),
+  loginAdmin: (payload: AdminLoginRequest) => adminAuthRequest(() => axiosInstance.post(API_ENDPOINTS.auth.adminLogin, payload, { withCredentials: true })),
+  registerAdmin: (payload: AdminRegisterRequest) => adminAuthRequest(() => axiosInstance.post(API_ENDPOINTS.auth.adminRegister, payload, { withCredentials: true })),
   register: (payload: RegisterPayload) => request<null>(() => axiosInstance.post(API_ENDPOINTS.auth.register, {
     firstName: payload.firstName.trim(),
     lastName: payload.lastName.trim(),
@@ -67,6 +94,8 @@ export const authService = {
   forgotPassword: (payload: ForgotPasswordPayload) => request<null>(() => axiosInstance.post(API_ENDPOINTS.auth.forgotPassword, payload)),
   resetPassword: (payload: ResetPasswordPayload) => request<null>(() => axiosInstance.post(API_ENDPOINTS.auth.resetPassword, payload)),
   whoAmI: (token?: string) => request<AuthUser>(() => axiosInstance.get(API_ENDPOINTS.auth.whoami, { headers: authorization(token) })),
+  getCurrentUser: (token?: string) => request<AuthUser>(() => axiosInstance.get(API_ENDPOINTS.auth.whoami, { headers: authorization(token) })),
+  logout: () => request<null>(() => axiosInstance.post("/auth/logout")),
   updateProfile: (payload: FormData, token?: string) => request<AuthUser>(() => axiosInstance.patch(API_ENDPOINTS.auth.update, payload, { headers: authorization(token) })),
   updatePassword: (payload: UpdatePasswordPayload, token?: string) => request<null>(() => axiosInstance.patch(API_ENDPOINTS.auth.password, payload, { headers: authorization(token) })),
 };

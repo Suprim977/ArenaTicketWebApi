@@ -13,31 +13,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { user, isLoading, logout } = useAuth();
 
   const navItems = [
-    { href: "/admin", label: "Dashboard" },
+    { href: "/admin/dashboard", label: "Dashboard" },
     { href: "/admin/events", label: "Events" },
     { href: "/admin/bookings", label: "Bookings" },
     { href: "/admin/users", label: "Users" },
     { href: "/admin/payments", label: "Payments" },
     { href: "/admin/tickets", label: "Tickets" },
-    { href: "/dashboard/profile", label: "Profile" },
   ];
 
   useEffect(() => {
     if (isLoading) return;
     if (!user) {
-      router.replace("/login");
+      router.replace("/admin/login");
       return;
     }
     if (user.role !== "admin") router.replace("/dashboard");
   }, [isLoading, router, user]);
 
-  if (!isLoading && user?.role !== "admin") {
+  if (isLoading || !user || user.role !== "admin") {
     return null;
   }
 
   const handleLogout = () => {
     logout();
-    router.push("/login");
+    router.push("/admin/login");
   };
 
   return (
@@ -54,10 +53,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               key={item.href}
               href={item.href}
               className={`block rounded-lg px-3 py-2 text-sm font-medium ${
-                (item.href === "/admin" ? pathname === item.href : pathname.startsWith(item.href)) ? "bg-indigo-50 text-arena-indigo dark:bg-slate-800 dark:text-sky-300" : "text-gray-700 dark:text-slate-200"
-              }`}
-            >
-              {item.label}
+              (item.href === "/admin/dashboard" ? pathname === item.href : pathname.startsWith(item.href)) ? "bg-indigo-50 text-arena-indigo dark:bg-slate-800 dark:text-sky-300" : "text-gray-700 dark:text-slate-200"
+            }`}
+          >
+            {item.label}
             </Link>
           ))}
         </nav>

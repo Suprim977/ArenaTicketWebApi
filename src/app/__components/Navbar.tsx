@@ -10,6 +10,7 @@ import Logo from "@/app/__components/Logo";
 const accountLinks = [
   { href: "/login", label: "Login" },
   { href: "/register", label: "Sign Up" },
+  { href: "/admin/login", label: "Admin Login" },
 ] as const;
 
 export default function Navbar() {

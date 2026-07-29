@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const authPages = ["/login", "/register", "/request-password-reset", "/reset-password"];
-const protectedPaths = ["/admin", "/dashboard", "/profile", "/bookings", "/tickets", "/booking", "/ticket", "/payment"];
+const authPages = ["/login", "/register", "/admin/login", "/admin/register", "/request-password-reset", "/reset-password"];
+const protectedPaths = ["/admin/dashboard", "/admin/events", "/admin/bookings", "/admin/users", "/admin/payments", "/admin/tickets", "/dashboard", "/profile", "/bookings", "/tickets", "/booking", "/ticket", "/payment"];
 
 export const authRedirectMiddleware = (request: NextRequest): NextResponse => {
   const token = request.cookies.get("token")?.value;
@@ -10,7 +10,7 @@ export const authRedirectMiddleware = (request: NextRequest): NextResponse => {
 
   if (authPages.includes(pathname)) {
     if (token) {
-      return NextResponse.redirect(new URL(role === "admin" ? "/admin" : "/dashboard", request.url));
+      return NextResponse.redirect(new URL(role === "admin" ? "/admin/dashboard" : "/dashboard", request.url));
     }
 
     return NextResponse.next();
@@ -28,7 +28,7 @@ export const authRedirectMiddleware = (request: NextRequest): NextResponse => {
   }
 
   if (pathname.startsWith("/dashboard") && role === "admin") {
-    return NextResponse.redirect(new URL("/admin", request.url));
+    return NextResponse.redirect(new URL("/admin/dashboard", request.url));
   }
 
   return NextResponse.next();
