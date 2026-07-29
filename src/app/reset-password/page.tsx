@@ -1,4 +1,4 @@
-import ResetPasswordForm from "./_components/ResetPasswordForm";
+import ResetPasswordForm from "@/app/reset-password/_components/ResetPasswordForm";
 
 type SearchParams = Promise<{
   token?: string;

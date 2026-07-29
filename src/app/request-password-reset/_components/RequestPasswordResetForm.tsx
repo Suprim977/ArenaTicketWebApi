@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Mail } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import type { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -27,8 +28,9 @@ export default function RequestPasswordResetForm() {
       const result = await requestPasswordResetApi({ email: values.email.trim().toLowerCase() });
       setSubmitted(true);
       toast.success(result.message);
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message ?? "Unable to request a password reset right now.");
+    } catch (error: unknown) {
+      const apiError = error as AxiosError<{ message?: string }>;
+      toast.error(apiError.response?.data?.message ?? "Unable to request a password reset right now.");
     }
   };
 

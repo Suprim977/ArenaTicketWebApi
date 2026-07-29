@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
-import Logo from "../__components/Logo";
+import Logo from "@/app/__components/Logo";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CheckCircle2, CreditCard, Gamepad2, QrCode, Search, ShieldCheck, Smartphone, Star, Ticket, Trophy } from "lucide-react";
-import Footer from "../__components/Footer";
-import Navbar from "../__components/Navbar";
+import Footer from "@/app/__components/Footer";
+import Navbar from "@/app/__components/Navbar";
 
 const features = [
   [Gamepad2, "Live Events", "Watch your favorite teams compete"], [Ticket, "Instant Tickets", "QR code delivery to your phone"], [Trophy, "VIP Experiences", "Meet & greet with pro players"],

@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { AxiosError } from "axios";
 import { CheckCircle2, Eye, EyeOff, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -49,8 +50,9 @@ export default function ResetPasswordForm({ token }: Props) {
       });
       setDone(true);
       toast.success(result.message);
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message ?? "Unable to reset your password right now.");
+    } catch (error: unknown) {
+      const apiError = error as AxiosError<{ message?: string }>;
+      toast.error(apiError.response?.data?.message ?? "Unable to reset your password right now.");
     }
   };
 

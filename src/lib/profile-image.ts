@@ -1,1 +1,1 @@
-export { BACKEND_ORIGIN, getMediaUrl as getProfileImageUrl } from "./media-url";
+export { BACKEND_ORIGIN, getMediaUrl as getProfileImageUrl } from "@/lib/media-url";

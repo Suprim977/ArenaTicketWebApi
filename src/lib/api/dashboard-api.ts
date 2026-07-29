@@ -1,5 +1,5 @@
-import axiosInstance from "./axios-instance";
-import { API_ENDPOINTS } from "./endpoints";
+import axiosInstance from "@/lib/api/axios-instance";
+import { API_ENDPOINTS } from "@/lib/api/endpoints";
 import type { ApiEnvelope } from "@/types/api";
 import type { Booking } from "@/types/booking";
 import type { CreateBookingPayload } from "@/types/booking";

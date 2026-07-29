@@ -1,5 +1,5 @@
-import axiosInstance from './axios-instance';
-import { API_ENDPOINTS } from './endpoints';
+import axiosInstance from "@/lib/api/axios-instance";
+import { API_ENDPOINTS } from "@/lib/api/endpoints";
 
 export type RequestPasswordResetPayload = {
   email: string;

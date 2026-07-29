@@ -19,7 +19,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: "/admin/users", label: "Users" },
     { href: "/admin/payments", label: "Payments" },
     { href: "/admin/tickets", label: "Tickets" },
-    { href: "/profile", label: "Profile" },
+    { href: "/dashboard/profile", label: "Profile" },
   ];
 
   useEffect(() => {

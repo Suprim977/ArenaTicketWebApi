@@ -1,6 +1,6 @@
-import { axiosInstance } from "../../api/axios-instance";
-import { API_ENDPOINTS } from "../../api/endpoints";
-import { getApiErrorMessage } from "../../api/error-message";
+import { axiosInstance } from "@/lib/api/axios-instance";
+import { API_ENDPOINTS } from "@/lib/api/endpoints";
+import { getApiErrorMessage } from "@/lib/api/error-message";
 import type { AuthRole } from "@/types/auth";
 
 type ActionResult<T> = {

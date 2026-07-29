@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import ThemeToggle from "@/components/ThemeToggle";
-import Logo from "./Logo";
+import Logo from "@/app/__components/Logo";
 
 const accountLinks = [
   { href: "/login", label: "Login" },

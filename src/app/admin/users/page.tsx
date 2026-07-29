@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { deleteUserAction, getUsersAction } from "@/lib/actions/admin/user-action";
-import DeleteModal from "../__components/DeleteModal";
-import UserTable from "../__components/UserTable";
+import DeleteModal from "@/app/admin/__components/DeleteModal";
+import UserTable from "@/app/admin/__components/UserTable";
 
 type UserData = {
   _id: string;

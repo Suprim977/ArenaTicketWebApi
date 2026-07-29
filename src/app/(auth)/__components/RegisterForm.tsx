@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { registerAction } from "@/lib/actions/auth-action";
-import { RegisterSchemaType, registerSchema } from "./schema";
+import { RegisterSchemaType, registerSchema } from "@/app/(auth)/__components/schema";
 
 const ErrorText = ({ message }: { message?: string }) =>
   message ? <p className="mt-1 text-xs text-red-500">{message}</p> : null;

@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import { loginAction } from "@/lib/actions/auth-action";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { LoginSchemaType, loginSchema } from "./schema";
+import { LoginSchemaType, loginSchema } from "@/app/(auth)/__components/schema";
 
 export default function LoginForm() {
   const router = useRouter();

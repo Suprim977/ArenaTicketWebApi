@@ -44,7 +44,7 @@ export default function TicketDetailPage({ params }: { params: { bookingRef: str
           <h1 className="mt-3 text-3xl font-black text-slate-900 dark:text-white">Booking not found</h1>
           <p className="mt-3 text-slate-600 dark:text-slate-300">We could not locate this confirmation. Return to booking history or create a new ticket.</p>
           <div className="mt-6 flex gap-3">
-            <Link href="/history" className="primary-btn">Booking history</Link>
+            <Link href="/dashboard/history" className="primary-btn">Booking history</Link>
             <Link href="/booking" className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:text-slate-200">Book again</Link>
           </div>
         </div>
@@ -87,7 +87,7 @@ export default function TicketDetailPage({ params }: { params: { bookingRef: str
           </div>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/history" className="primary-btn">
+            <Link href="/dashboard/history" className="primary-btn">
               Booking history
             </Link>
             <Link href="/search" className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">

@@ -1,15 +1,16 @@
 'use server';
 
-import { authService } from '@/services/auth.service';
-import type { AuthPayload, RegisterPayload, ResetPasswordPayload } from '@/types/auth';
+import { authService } from "@/services/auth.service";
+import type { AuthPayload, RegisterPayload } from "@/types/auth";
 
 export const handleRequestPasswordReset = async (email: string | { email: string }) => {
   try {
     const normalizedEmail = typeof email === 'string' ? email : email.email;
     const response = await authService.forgotPassword({ email: normalizedEmail });
     return { ok: true, success: true, message: response.message || 'Password reset email sent successfully' };
-  } catch (error: any) {
-    return { ok: false, success: false, message: error?.response?.data?.message || 'Request password reset failed' };
+  } catch (error: unknown) {
+    const apiError = error as { response?: { data?: { message?: string } } };
+    return { ok: false, success: false, message: apiError.response?.data?.message || 'Request password reset failed' };
   }
 };
 
@@ -29,8 +30,9 @@ export const handleResetPassword = async (
       confirmPassword: password,
     });
     return { ok: true, success: true, message: response.message || 'Password has been reset successfully' };
-  } catch (error: any) {
-    return { ok: false, success: false, message: error?.response?.data?.message || 'Reset password failed' };
+  } catch (error: unknown) {
+    const apiError = error as { response?: { data?: { message?: string } } };
+    return { ok: false, success: false, message: apiError.response?.data?.message || 'Reset password failed' };
   }
 };
 
